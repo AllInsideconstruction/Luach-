@@ -8,6 +8,7 @@ A single-file copy of the luach that asks the phone for its GPS position, so can
 - Choose **Follow my GPS** in the "Times for" box (it is the default in this copy).
 - The phone asks for location permission the first time. After that it updates each time you open the page or switch back to it.
 - The last position is remembered, so the times show straight away even before the new GPS fix arrives.
+- The top of the dashboard shows the town you're in ("You're in Salford"). To get the town name, the phone sends its rough position (to about 1 km) to BigDataCloud's free lookup service, once per new place. If that service can't be reached, it shows the nearest city on the built-in list instead.
 - It does not run in the background or keep a history of where you have been.
 
 ## Where your entries are saved

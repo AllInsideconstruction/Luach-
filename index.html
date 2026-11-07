@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Luach">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Yehuda's Luach</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap">
+<style>
+/* Layout: a calm "luach" board. A deep tekhelet band holds today's date; below, a two-column grid of working panels that stacks on phones. */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --ink:#18213a; --muted:#5b6582; --line:#dde2ec;
+  --tekhelet:#1f3f8f; --tekhelet-soft:#e4eaf8; --band:#142a61; --band-ink:#f2f5fc; --band-muted:#b7c3e4;
+  --gold:#b0861e; --gold-soft:#f6eed8; --good:#2f7a4f; --good-soft:#e2f2e8; --warn:#9a5a00;
+  --f-display:"Frank Ruhl Libre","Times New Roman",serif;
+  --f-body:"Assistant",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1322; --surface:#161d31; --ink:#e6eaf5; --muted:#99a3bf; --line:#283150;
+  --tekhelet:#8eaaf2; --tekhelet-soft:#1e2a4c; --band:#0a1838; --band-ink:#eef2fc; --band-muted:#a2b0d6;
+  --gold:#e0b850; --gold-soft:#2f2914; --good:#6fcf97; --good-soft:#163024; --warn:#f0a94a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1322; --surface:#161d31; --ink:#e6eaf5; --muted:#99a3bf; --line:#283150;
+  --tekhelet:#8eaaf2; --tekhelet-soft:#1e2a4c; --band:#0a1838; --band-ink:#eef2fc; --band-muted:#a2b0d6;
+  --gold:#e0b850; --gold-soft:#2f2914; --good:#6fcf97; --good-soft:#163024; --warn:#f0a94a; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;font-weight:700}
+.he{font-family:var(--f-display);direction:rtl;unicode-bidi:isolate}
+.num{font-variant-numeric:tabular-nums}
+.label{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+
+/* band */
+.band{background:var(--band);color:var(--band-ink)}
+.band .wrap{padding-block:28px 26px;display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:end}
+.band .label{color:var(--band-muted)}
+.hdate{font-size:clamp(34px,6vw,54px);line-height:1.1;font-weight:700}
+.gdate{color:var(--band-muted);margin-top:6px;font-size:16px}
+.who{font-family:var(--f-display);font-size:18px;color:var(--band-muted);margin-bottom:10px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 22px}
+.fact .v{font-size:17px;font-weight:600}
+.fact .s{color:var(--band-muted);font-size:13px}
+.band select{background:transparent;color:var(--band-ink);border:1px solid color-mix(in srgb,var(--band-muted) 50%,transparent);border-radius:6px;padding:2px 6px;font:inherit;font-size:13px}
+.band select option{color:#18213a;background:#fff}
+.spot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.spot input{flex:1 1 150px;min-width:0;background:transparent;color:var(--band-ink);border:1px solid color-mix(in srgb,var(--band-muted) 50%,transparent);border-radius:6px;padding:4px 8px;font:inherit;font-size:13px}
+.spot input::placeholder{color:var(--band-muted)}
+.mini{background:var(--band-ink);color:var(--band);border:0;border-radius:6px;padding:4px 10px;font-weight:600;font-size:13px}
+.spot .s{flex-basis:100%}
+.spot .s:empty{display:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* grid */
+main .wrap{padding-block:24px 48px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.span-5{grid-column:span 5}.span-7{grid-column:span 7}.span-12{grid-column:span 12}.span-6{grid-column:span 6}
+.phead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.phead h2{font-size:21px}
+.hint{color:var(--muted);font-size:13px}
+
+/* daf */
+.daf{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.daf .big{font-family:var(--f-display);font-size:34px;line-height:1.1}
+.daf .he{font-size:22px;color:var(--muted)}
+.progress{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--gold)}
+
+/* buttons & inputs */
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--tekhelet);background:var(--tekhelet);color:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--tekhelet)}
+.btn.done{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+form.row{display:grid;gap:10px;grid-template-columns:1.1fr 1.6fr .7fr auto;align-items:end}
+form.row.tz{grid-template-columns:.7fr 1.6fr 1fr auto}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:12px;color:var(--muted);font-weight:600}
+input,select.in{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+
+/* checklist */
+.checks{display:flex;flex-direction:column}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.crow:first-child{border-top:0}
+.cname{font-weight:600}
+.cname small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.dots{display:flex;gap:5px}
+.dot{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:transparent;padding:0;display:grid;place-items:center;font-size:10px;color:var(--muted)}
+.dot.on{background:var(--tekhelet);border-color:var(--tekhelet);color:var(--surface)}
+.dot.today{border-color:var(--tekhelet)}
+.dot.today.on{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--tekhelet)}
+.streak{min-width:52px;text-align:right;font-size:13px;color:var(--muted)}
+.streak b{color:var(--gold);font-size:15px}
+.daylabels{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px}
+.daylabels .dots span{width:22px;text-align:center;font-size:10.5px;color:var(--muted)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stat{background:var(--bg);border-radius:10px;padding:12px}
+.stat .v{font-size:24px;font-weight:700}
+.stat .s{font-size:12.5px;color:var(--muted)}
+svg text{fill:var(--muted);font-family:var(--f-body)}
+.chart{width:100%;height:auto;display:block}
+
+/* lists */
+.list{display:flex;flex-direction:column}
+.item{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.chip{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--tekhelet-soft);color:var(--tekhelet);white-space:nowrap}
+.chip.gold{background:var(--gold-soft);color:var(--gold)}
+.item .t{overflow-wrap:anywhere}
+.item .t small{display:block;color:var(--muted);font-size:12.5px}
+.x{border:0;background:transparent;color:var(--muted);padding:4px 6px;border-radius:6px}
+.x:hover{color:var(--warn);background:var(--bg)}
+.empty{color:var(--muted);background:var(--bg);border-radius:10px;padding:16px;font-size:14px}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:110px minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:13.5px}
+.bar .track{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar .track i{display:block;height:100%;background:var(--tekhelet);border-radius:4px}
+.notice{font-size:13px;color:var(--warn)}
+.chag{display:flex;flex-direction:column;gap:2px}
+.chaglist{display:flex;flex-direction:column}
+.chaglist .ch{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.chaglist .ch:first-child{border-top:0}
+.goal{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.goal input{width:72px;padding:4px 8px}
+
+@media (max-width:860px){
+  .band .wrap{grid-template-columns:1fr}
+  .span-5,.span-7,.span-6{grid-column:span 12}
+  form.row,form.row.tz{grid-template-columns:1fr 1fr}
+  form.row .wide{grid-column:span 2}
+}
+@media (max-width:440px){
+  .stats{grid-template-columns:1fr 1fr}
+  .bar{grid-template-columns:84px minmax(0,1fr) 48px}
+  .dot{width:20px;height:20px}.daylabels .dots span{width:20px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="band">
+  <div class="wrap">
+    <div>
+      <div class="who">Yehuda's Luach</div>
+      <div class="hdate he" id="hdate">&nbsp;</div>
+      <div class="gdate" id="gdate">&nbsp;</div>
+    </div>
+    <div class="facts">
+      <div class="fact">
+        <div class="label">Candle lighting · Friday</div>
+        <div class="v num" id="candles">—</div>
+        <div class="s" id="shabbatIn">&nbsp;</div>
+      </div>
+      <div class="fact">
+        <div class="label">Havdalah · Motzei Shabbat</div>
+        <div class="v num" id="havdalah">—</div>
+        <div class="s"><label for="city" class="label" style="letter-spacing:0;text-transform:none">Times for </label><select id="city"></select></div>
+        <form class="spot" id="spotForm" hidden autocomplete="off"><label for="spot" class="sr">Coordinates</label><input id="spot" placeholder="51.5074, -0.1278 or Maps link"><button type="submit" class="mini">Set</button><span class="s" id="spotMsg" role="status"></span></form>
+        <div class="spot" id="gpsRow" hidden><button type="button" class="mini" id="gpsNow">Update GPS now</button><span class="s" id="gpsMsg" role="status"></span></div>
+      </div>
+      <div class="fact">
+        <div class="label">Next chag</div>
+        <div class="v" id="nextChag">—</div>
+        <div class="s" id="nextChagWhen">&nbsp;</div>
+      </div>
+      <div class="fact">
+        <div class="label" id="extraLabel">Learning this week</div>
+        <div class="v num" id="extraV">—</div>
+        <div class="s" id="extraS">&nbsp;</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <section class="panel span-7" aria-labelledby="dafH">
+      <div class="phead"><h2 id="dafH">Daf Yomi</h2><span class="hint num" id="dafCycle"></span></div>
+      <div class="daf">
+        <div>
+          <div class="big" id="dafEn">—</div>
+          <div class="he" id="dafHe"></div>
+        </div>
+        <button class="btn" id="dafBtn" type="button">Mark today's daf learned</button>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="dafBar" style="width:0"></i></div>
+      <div class="hint" id="dafNote">Cycle 14 of the Babylonian Talmud, 2,711 dapim.</div>
+    </section>
+
+    <section class="panel span-5" aria-labelledby="chagH">
+      <div class="phead"><h2 id="chagH">Coming up</h2><span class="hint">Diaspora dates</span></div>
+      <div class="chaglist" id="chagList"></div>
+    </section>
+
+    <section class="panel span-6" aria-labelledby="practiceH">
+      <div class="phead"><h2 id="practiceH">Daily practice</h2><span class="hint">Tap a circle to mark any of the last 7 days</span></div>
+      <div class="daylabels"><span></span><div class="dots" id="dayLabels"></div><span class="streak">streak</span></div>
+      <div class="checks" id="checks"></div>
+      <div class="notice" id="practiceNote" hidden></div>
+    </section>
+
+    <section class="panel span-6" aria-labelledby="statsH">
+      <div class="phead"><h2 id="statsH">Learning this week</h2>
+        <span class="goal"><label for="goal">Weekly goal (minutes)</label><input id="goal" type="number" min="0" step="15" inputmode="numeric"></span></div>
+      <div class="stats">
+        <div class="stat"><div class="v num" id="sWeek">0</div><div class="s">minutes this week</div></div>
+        <div class="stat"><div class="v num" id="sGoal">—</div><div class="s">of weekly goal</div></div>
+        <div class="stat"><div class="v num" id="sDays">0</div><div class="s">days learned, last 7</div></div>
+      </div>
+      <svg class="chart" id="weekChart" viewBox="0 0 420 150" role="img" aria-label="Minutes learned per day over the last 7 days"></svg>
+      <div class="bars" id="subjectBars"></div>
+    </section>
+
+    <section class="panel span-7" aria-labelledby="logH">
+      <div class="phead"><h2 id="logH">Learning log</h2><span class="hint" id="logCount"></span></div>
+      <form class="row" id="logForm" autocomplete="off">
+        <div class="field"><label for="lSubject">Subject</label>
+          <select class="in" id="lSubject">
+            <option>Gemara</option><option>Chumash</option><option>Mishnah</option><option>Halacha</option>
+            <option>Navi</option><option>Tanya / Chassidus</option><option>Mussar</option><option>Tehillim</option><option>Shiur</option><option>Other</option>
+          </select></div>
+        <div class="field wide"><label for="lText">What did you learn?</label><input id="lText" placeholder="e.g. Bava Kamma 45a with Tosafos" maxlength="140"></div>
+        <div class="field"><label for="lMin">Minutes</label><input id="lMin" type="number" min="1" max="600" value="30" inputmode="numeric"></div>
+        <button class="btn" type="submit" id="lAdd">Add</button>
+      </form>
+      <div class="list" id="logList"><div class="empty">Loading your learning…</div></div>
+    </section>
+
+    <section class="panel span-5" aria-labelledby="tzH">
+      <div class="phead"><h2 id="tzH">Tzedakah</h2><span class="hint num" id="tzMonth"></span></div>
+      <form class="row tz" id="tzForm" autocomplete="off">
+        <div class="field"><label for="tAmt">Amount (£)</label><input id="tAmt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="18"></div>
+        <div class="field wide"><label for="tCause">To</label><input id="tCause" placeholder="e.g. Shul appeal" maxlength="80"></div>
+        <div class="field"><label for="tDate">Date</label><input id="tDate" type="date"></div>
+        <button class="btn" type="submit" id="tAdd">Add</button>
+      </form>
+      <div class="list" id="tzList"><div class="empty">Loading tzedakah…</div></div>
+    </section>
+
+    <p class="hint span-12" id="status">Zmanim are approximate (candle lighting before sunset, havdalah 50 minutes after). Check your local luach for exact times.</p>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+const GPS_ENABLED=true; /* the self-hosted copy sets this to true */
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const keyOf=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const today=new Date(); today.setHours(12,0,0,0);
+const TODAY=keyOf(today);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+
+/* ---------- Hebrew calendar ---------- */
+const hFmt=new Intl.DateTimeFormat("en-u-ca-hebrew",{day:"numeric",month:"long",year:"numeric",timeZone:"UTC"});
+function heb(d){
+  const u=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate(),12));
+  const p={};hFmt.formatToParts(u).forEach(x=>p[x.type]=x.value);
+  return {day:+p.day,month:p.month,year:+p.year};
+}
+function gem(n){ // gematria for 1..999
+  const ones=["","א","ב","ג","ד","ה","ו","ז","ח","ט"],tens=["","י","כ","ל","מ","נ","ס","ע","פ","צ"],hund=["","ק","ר","ש","ת","תק","תר","תש","תת","תתק"];
+  let s=hund[Math.floor(n/100)];let r=n%100;
+  if(r===15)s+="טו";else if(r===16)s+="טז";else s+=tens[Math.floor(r/10)]+ones[r%10];
+  return s.length>1?s.slice(0,-1)+"״"+s.slice(-1):s+"׳";
+}
+const HE_MONTH={Tishri:"תשרי",Heshvan:"חשון",Kislev:"כסלו",Tevet:"טבת",Shevat:"שבט",Adar:"אדר","Adar I":"אדר א׳","Adar II":"אדר ב׳",Nisan:"ניסן",Iyar:"אייר",Sivan:"סיון",Tamuz:"תמוז",Av:"אב",Elul:"אלול"};
+const EN_MONTH={Tishri:"Tishrei",Heshvan:"Cheshvan",Tamuz:"Tammuz"};
+const h=heb(today);
+$("hdate").textContent=gem(h.day)+" "+(HE_MONTH[h.month]||h.month)+" "+gem(h.year%1000);
+$("gdate").textContent=h.day+" "+(EN_MONTH[h.month]||h.month)+" "+h.year+" · "+today.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+
+/* ---------- Chagim ---------- */
+const CHAGIM=[
+  ["Tishri",1,"Rosh Hashanah"],["Tishri",10,"Yom Kippur"],["Tishri",15,"Sukkot"],["Tishri",22,"Shemini Atzeret"],["Tishri",23,"Simchat Torah"],
+  ["Kislev",25,"Chanukah"],["Tevet",10,"Asara B'Tevet"],["Shevat",15,"Tu BiShvat"],["Adar",14,"Purim"],["Adar II",14,"Purim"],
+  ["Nisan",15,"Pesach"],["Iyar",18,"Lag BaOmer"],["Sivan",6,"Shavuot"],["Tamuz",17,"Shiva Asar B'Tammuz"],["Av",9,"Tisha B'Av"]
+];
+const upcoming=[];
+for(let i=0;i<400&&upcoming.length<6;i++){
+  const d=addDays(today,i),hd=heb(d);
+  for(const [m,day,name] of CHAGIM){ if(hd.month===m&&hd.day===day) upcoming.push({d,name,i}); }
+}
+const when=i=>i===0?"Today":i===1?"Tomorrow":"In "+i+" days";
+const gshort=d=>d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"});
+if(upcoming.length){
+  $("nextChag").textContent=upcoming[0].name;
+  $("nextChagWhen").textContent=when(upcoming[0].i)+" · "+gshort(upcoming[0].d);
+}
+$("chagList").innerHTML=upcoming.map(u=>`<div class="ch"><span><b>${esc(u.name)}</b> <span class="hint">${esc(gshort(u.d))}</span></span><span class="hint num">${esc(when(u.i))}</span></div>`).join("");
+
+/* Omer */
+function omerDay(hd){
+  if(hd.month==="Nisan"&&hd.day>=16)return hd.day-15;
+  if(hd.month==="Iyar")return 15+hd.day;
+  if(hd.month==="Sivan"&&hd.day<=5)return 44+hd.day;
+  return 0;
+}
+
+/* ---------- Daf Yomi (cycle 14 began 5 Jan 2020) ---------- */
+const MAS=[["Berachot","ברכות",64],["Shabbat","שבת",157],["Eruvin","עירובין",105],["Pesachim","פסחים",121],["Shekalim","שקלים",22],["Yoma","יומא",88],["Sukkah","סוכה",56],["Beitzah","ביצה",40],["Rosh Hashanah","ראש השנה",35],["Taanit","תענית",31],["Megillah","מגילה",32],["Moed Katan","מועד קטן",29],["Chagigah","חגיגה",27],["Yevamot","יבמות",122],["Ketubot","כתובות",112],["Nedarim","נדרים",91],["Nazir","נזיר",66],["Sotah","סוטה",49],["Gittin","גיטין",90],["Kiddushin","קידושין",82],["Bava Kamma","בבא קמא",119],["Bava Metzia","בבא מציעא",119],["Bava Batra","בבא בתרא",176],["Sanhedrin","סנהדרין",113],["Makkot","מכות",24],["Shevuot","שבועות",49],["Avodah Zarah","עבודה זרה",76],["Horayot","הוריות",14],["Zevachim","זבחים",120],["Menachot","מנחות",110],["Chullin","חולין",142],["Bechorot","בכורות",61],["Arachin","ערכין",34],["Temurah","תמורה",34],["Keritot","כריתות",28],["Meilah","מעילה",22],["Kinnim","קינים",4,21],["Tamid","תמיד",9,24],["Middot","מדות",5,32],["Niddah","נדה",73]];
+function dafFor(d){
+  const days=Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2020,0,5))/864e5);
+  const cycleLen=2711; let cyc=14+Math.floor(days/cycleLen); let n=((days%cycleLen)+cycleLen)%cycleLen; const pos=n;
+  for(const [en,he,blatt,off] of MAS){ const cnt=blatt-1; if(n<cnt){ const daf=(off||0)+n+2; return {en,he,daf,cyc,pos}; } n-=cnt; }
+}
+const daf=dafFor(today);
+$("dafEn").textContent=daf.en+" "+daf.daf;
+$("dafHe").textContent=daf.he+" "+gem(daf.daf).replace(/[״׳]/g,"");
+$("dafCycle").textContent="Day "+(daf.pos+1).toLocaleString("en-GB")+" of 2,711 · cycle "+daf.cyc;
+$("dafBar").style.width=((daf.pos+1)/2711*100).toFixed(2)+"%";
+
+/* ---------- Zmanim (NOAA sunset) ---------- */
+const CITIES={
+  london:{n:"London",lat:51.5074,lng:-0.1278,tz:"Europe/London",cl:18},
+  manchester:{n:"Manchester",lat:53.4808,lng:-2.2426,tz:"Europe/London",cl:18},
+  gateshead:{n:"Gateshead",lat:54.9526,lng:-1.6014,tz:"Europe/London",cl:18},
+  leeds:{n:"Leeds",lat:53.8008,lng:-1.5491,tz:"Europe/London",cl:18},
+  glasgow:{n:"Glasgow",lat:55.8642,lng:-4.2518,tz:"Europe/London",cl:18},
+  dublin:{n:"Dublin",lat:53.3498,lng:-6.2603,tz:"Europe/Dublin",cl:18},
+  paris:{n:"Paris",lat:48.8566,lng:2.3522,tz:"Europe/Paris",cl:18},
+  antwerp:{n:"Antwerp",lat:51.2194,lng:4.4025,tz:"Europe/Brussels",cl:18},
+  amsterdam:{n:"Amsterdam",lat:52.3676,lng:4.9041,tz:"Europe/Amsterdam",cl:18},
+  zurich:{n:"Zurich",lat:47.3769,lng:8.5417,tz:"Europe/Zurich",cl:18},
+  berlin:{n:"Berlin",lat:52.52,lng:13.405,tz:"Europe/Berlin",cl:18},
+  vienna:{n:"Vienna",lat:48.2082,lng:16.3738,tz:"Europe/Vienna",cl:18},
+  rome:{n:"Rome",lat:41.9028,lng:12.4964,tz:"Europe/Rome",cl:18},
+  moscow:{n:"Moscow",lat:55.7558,lng:37.6173,tz:"Europe/Moscow",cl:18},
+  jerusalem:{n:"Jerusalem",lat:31.7683,lng:35.2137,tz:"Asia/Jerusalem",cl:40},
+  bneibrak:{n:"Bnei Brak",lat:32.0807,lng:34.8338,tz:"Asia/Jerusalem",cl:22},
+  johannesburg:{n:"Johannesburg",lat:-26.2041,lng:28.0473,tz:"Africa/Johannesburg",cl:18},
+  newyork:{n:"New York",lat:40.7128,lng:-74.006,tz:"America/New_York",cl:18},
+  lakewood:{n:"Lakewood",lat:40.0821,lng:-74.2097,tz:"America/New_York",cl:18},
+  miami:{n:"Miami",lat:25.7617,lng:-80.1918,tz:"America/New_York",cl:18},
+  toronto:{n:"Toronto",lat:43.6532,lng:-79.3832,tz:"America/Toronto",cl:18},
+  montreal:{n:"Montreal",lat:45.5017,lng:-73.5673,tz:"America/Montreal",cl:18},
+  chicago:{n:"Chicago",lat:41.8781,lng:-87.6298,tz:"America/Chicago",cl:18},
+  losangeles:{n:"Los Angeles",lat:34.0522,lng:-118.2437,tz:"America/Los_Angeles",cl:18},
+  mexicocity:{n:"Mexico City",lat:19.4326,lng:-99.1332,tz:"America/Mexico_City",cl:18},
+  saopaulo:{n:"São Paulo",lat:-23.5505,lng:-46.6333,tz:"America/Sao_Paulo",cl:18},
+  buenosaires:{n:"Buenos Aires",lat:-34.6037,lng:-58.3816,tz:"America/Argentina/Buenos_Aires",cl:18},
+  sydney:{n:"Sydney",lat:-33.8688,lng:151.2093,tz:"Australia/Sydney",cl:18},
+  melbourne:{n:"Melbourne",lat:-37.8136,lng:144.9631,tz:"Australia/Melbourne",cl:18}
+};
+function sunsetUTC(y,m,d,lat,lng){
+  const rad=Math.PI/180;
+  const N=Math.round((Date.UTC(y,m-1,d)-Date.UTC(y,0,0))/864e5);
+  const lngHour=lng/15,t=N+((18-lngHour)/24);
+  const M=0.9856*t-3.289;
+  let L=M+1.916*Math.sin(M*rad)+0.020*Math.sin(2*M*rad)+282.634; L=(L+360)%360;
+  let RA=Math.atan(0.91764*Math.tan(L*rad))/rad; RA=(RA+360)%360;
+  RA+= (Math.floor(L/90)*90-Math.floor(RA/90)*90); RA/=15;
+  const sinDec=0.39782*Math.sin(L*rad),cosDec=Math.cos(Math.asin(sinDec));
+  const cosH=(Math.cos(90.833*rad)-sinDec*Math.sin(lat*rad))/(cosDec*Math.cos(lat*rad));
+  if(cosH<-1||cosH>1)return null;
+  const H=Math.acos(cosH)/rad/15;
+  const T=H+RA-0.06571*t-6.622;
+  const UT=((T-lngHour)%24+24)%24;
+  return new Date(Date.UTC(y,m-1,d)+UT*36e5);
+}
+/* Auto: follow the device's time zone, which changes when Yehuda travels */
+let deviceTz=""; try{ deviceTz=Intl.DateTimeFormat().resolvedOptions().timeZone||""; }catch(e){}
+const TZ_ALIAS={"America/Montreal":"America/Toronto","Asia/Tel_Aviv":"Asia/Jerusalem","Europe/Belfast":"Europe/London","America/Buenos_Aires":"America/Argentina/Buenos_Aires"};
+function autoCity(){
+  const tz=TZ_ALIAS[deviceTz]||deviceTz;
+  const hit=Object.keys(CITIES).find(k=>(TZ_ALIAS[CITIES[k].tz]||CITIES[k].tz)===tz);
+  return hit||null;
+}
+/* Location: auto (time zone), GPS (self-hosted copy only), exact coordinates, or a named city */
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(_){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}};
+const GPS_OK=GPS_ENABLED&&!!(navigator.geolocation);
+let spot=null; try{ spot=JSON.parse(lsGet("luach-spot")||"null"); }catch(_){}
+let gpsFix=null; try{ gpsFix=JSON.parse(lsGet("luach-gps")||"null"); }catch(_){}
+let cityChoice=lsGet("luach-city")||(GPS_OK?"gps":"auto");
+const validChoice=k=>k==="auto"||k==="custom"||(k==="gps"&&GPS_OK)||!!CITIES[k];
+if(!validChoice(cityChoice))cityChoice="auto";
+let place=CITIES.london, placeNote="";
+const fmtLL=(lat,lng)=>lat.toFixed(4)+", "+lng.toFixed(4);
+function parseSpot(s){
+  s=String(s||"");
+  const at=s.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+  const m=at||s.match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
+  if(!m)return null;
+  const lat=+m[1],lng=+m[2];
+  if(!(Math.abs(lat)<=90&&Math.abs(lng)<=180))return null;
+  return {lat,lng};
+}
+function resolveCity(){
+  const a=autoCity(), autoName=a?CITIES[a].n:"London";
+  placeNote="";
+  if(cityChoice==="custom"&&spot){ place={n:"Your spot",lat:spot.lat,lng:spot.lng,tz:deviceTz||"Europe/London",cl:18}; placeNote="Times for "+fmtLL(spot.lat,spot.lng)+" in your device's time zone. "; }
+  else if(cityChoice==="gps"&&gpsFix){ place={n:"GPS",lat:gpsFix.lat,lng:gpsFix.lng,tz:deviceTz||"Europe/London",cl:18}; placeNote="Times for your GPS position "+fmtLL(gpsFix.lat,gpsFix.lng)+", updated "+new Date(gpsFix.at).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit"})+". "; }
+  else { place=CITIES[cityChoice]||CITIES[a||"london"]; if(cityChoice==="auto"&&!a)placeNote="Your device's time zone ("+deviceTz+") isn't on the city list yet, so times show for London. Pick the nearest city or enter your coordinates. "; if(cityChoice==="gps")placeNote="Waiting for GPS. Showing "+place.n+" until your phone answers. "; }
+  let opts=`<option value="auto">Auto · ${autoName}</option>`;
+  if(GPS_OK)opts+=`<option value="gps">Follow my GPS</option>`;
+  opts+=`<option value="custom">Exact coordinates…</option>`;
+  opts+=Object.entries(CITIES).map(([k,c])=>`<option value="${k}">${c.n}</option>`).join("");
+  $("city").innerHTML=opts; $("city").value=cityChoice;
+  $("spotForm").hidden=cityChoice!=="custom";
+  if(cityChoice==="custom"&&spot&&document.activeElement!==$("spot"))$("spot").value=fmtLL(spot.lat,spot.lng);
+  $("gpsRow").hidden=cityChoice!=="gps";
+  $("status").textContent=placeNote+"Zmanim are approximate (candle lighting before sunset, havdalah 50 minutes after). Check your local luach for exact times. This copy saves your entries on this device only.";
+}
+function refreshGps(){
+  if(!GPS_OK||cityChoice!=="gps")return;
+  $("gpsMsg").textContent="Finding you…";
+  navigator.geolocation.getCurrentPosition(p=>{
+    gpsFix={lat:p.coords.latitude,lng:p.coords.longitude,at:Date.now()};
+    lsSet("luach-gps",JSON.stringify(gpsFix));
+    $("gpsMsg").textContent="Located within about "+Math.round(p.coords.accuracy)+" m";
+    resolveCity();renderZmanim();
+  },err=>{
+    $("gpsMsg").textContent=err.code===1?"Location is blocked. Allow it for this site in your browser settings, or enter coordinates instead.":"Couldn't get a GPS fix. Using your last known position.";
+  },{enableHighAccuracy:false,maximumAge:10*60*1000,timeout:20000});
+}
+resolveCity();
+function renderZmanim(){
+  const c=place;
+  const dow=today.getDay();
+  const fri=addDays(today,dow===6?-1:(5-dow+7)%7), sat=addDays(fri,1);
+  const tf=dt=>dt?dt.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:c.tz}):"—";
+  const ssF=sunsetUTC(fri.getFullYear(),fri.getMonth()+1,fri.getDate(),c.lat,c.lng);
+  const ssS=sunsetUTC(sat.getFullYear(),sat.getMonth()+1,sat.getDate(),c.lat,c.lng);
+  $("candles").textContent=ssF?tf(new Date(ssF-c.cl*6e4)):"—";
+  $("havdalah").textContent=ssS?tf(new Date(+ssS+50*6e4)):"—";
+  const dd=Math.round((fri-today)/864e5);
+  $("shabbatIn").textContent=dow===6?"Shabbat today · "+gshort(fri):dd===0?"Erev Shabbat today":"Shabbat in "+dd+" day"+(dd===1?"":"s")+" · "+gshort(fri);
+}
+renderZmanim();
+$("city").addEventListener("change",e=>{cityChoice=e.target.value;lsSet("luach-city",cityChoice);resolveCity();renderZmanim();if(cityChoice==="custom"&&!spot)$("spot").focus();refreshGps();});
+$("spotForm").addEventListener("submit",e=>{e.preventDefault();const s=parseSpot($("spot").value);if(!s){$("spotMsg").textContent="Paste two numbers like 51.5074, -0.1278, or a Google Maps link.";return;}$("spotMsg").textContent="";spot=s;lsSet("luach-spot",JSON.stringify(s));resolveCity();renderZmanim();});
+$("gpsNow").addEventListener("click",refreshGps);
+refreshGps();
+/* Re-check when the page comes back into view, e.g. after landing somewhere new */
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState!=="visible")return; try{ const t=Intl.DateTimeFormat().resolvedOptions().timeZone; if(t&&t!==deviceTz){deviceTz=t;resolveCity();renderZmanim();} }catch(_){ } refreshGps(); });
+
+/* ---------- State ---------- */
+const PRACTICES=[
+  ["shacharit","Shacharit","Morning tefillah"],["tefillin","Tefillin",""],["mincha","Mincha",""],["maariv","Maariv",""],
+  ["tehillim","Tehillim","A chapter or more"],["daf","Daf Yomi","Today's daf"],["chessed","Chessed","An act of kindness"]
+];
+const last7=[...Array(7)].map((_,i)=>addDays(today,i-6));
+let days={}, logs=[], tz=[], settings={weeklyGoal:300};
+let db=null, canWrite=true;
+
+function setStatus(msg){ $("practiceNote").hidden=!msg; $("practiceNote").textContent=msg||""; }
+
+/* practice */
+$("dayLabels").innerHTML=last7.map(d=>`<span>${d.toLocaleDateString("en-GB",{weekday:"narrow"})}</span>`).join("");
+function isOn(k,p){return !!(days[k]&&days[k].checks&&days[k].checks[p])}
+function streak(p){let n=0;for(let i=0;i<400;i++){const k=keyOf(addDays(today,-i));if(isOn(k,p))n++;else if(i===0)continue;else break;}return n;}
+function renderPractice(){
+  $("checks").innerHTML=PRACTICES.map(([id,name,sub])=>{
+    const dots=last7.map(d=>{const k=keyOf(d),on=isOn(k,id),t=k===TODAY;
+      return `<button type="button" class="dot${on?" on":""}${t?" today":""}" data-p="${id}" data-k="${k}" aria-pressed="${on}" aria-label="${name}, ${d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"})}">${on?"✓":""}</button>`}).join("");
+    const s=streak(id);
+    return `<div class="crow"><div class="cname">${name}${sub?`<small>${sub}</small>`:""}</div><div class="dots">${dots}</div><div class="streak num">${s?`<b>${s}</b> day${s===1?"":"s"}`:"—"}</div></div>`;
+  }).join("");
+  const done=isOn(TODAY,"daf");
+  $("dafBtn").textContent=done?"Learned today ✓":"Mark today's daf learned";
+  $("dafBtn").className="btn"+(done?" done":"");
+  $("dafBtn").setAttribute("aria-pressed",done);
+}
+const busy=new Set();
+async function toggle(k,p){
+  if(!db){setStatus("Sign in to claude.ai to save your checklist.");return;}
+  if(busy.has(k))return; busy.add(k);
+  const prev=days[k]; const checks=Object.assign({},prev&&prev.checks); checks[p]=!checks[p];
+  days=Object.assign({},days,{[k]:{date:k,checks}}); renderPractice();
+  try{ await db.doc("days/"+k).set({date:k,checks}); setStatus(""); }
+  catch(e){ days=Object.assign({},days,{[k]:prev}); renderPractice(); setStatus(e&&e.code==="permission_denied"?"You can view this luach but not change it.":"That didn't save. Your browser may be blocking storage for this site."); }
+  finally{ busy.delete(k); }
+}
+$("checks").addEventListener("click",e=>{const b=e.target.closest(".dot");if(b)toggle(b.dataset.k,b.dataset.p);});
+$("dafBtn").addEventListener("click",()=>toggle(TODAY,"daf"));
+
+/* learning */
+function renderLearning(){
+  const startKey=keyOf(last7[0]);
+  const week=logs.filter(l=>l.date>=startKey&&l.date<=TODAY);
+  const mins=week.reduce((a,l)=>a+(+l.minutes||0),0);
+  const goal=+settings.weeklyGoal||0;
+  $("sWeek").textContent=mins.toLocaleString("en-GB");
+  $("sGoal").textContent=goal?Math.round(mins/goal*100)+"%":"—";
+  $("sDays").textContent=new Set(week.map(l=>l.date)).size;
+  if(document.activeElement!==$("goal"))$("goal").value=goal||"";
+  // header fact: omer or week minutes
+  const om=omerDay(h);
+  if(om){$("extraLabel").textContent="Sefirat HaOmer";$("extraV").textContent="Day "+om;$("extraS").textContent=Math.floor(om/7)+" weeks, "+(om%7)+" days";}
+  else{$("extraLabel").textContent="Learning this week";$("extraV").textContent=mins+" min";$("extraS").textContent=goal?Math.round(mins/goal*100)+"% of "+goal+" min goal":"No goal set";}
+  // chart
+  const per=last7.map(d=>{const k=keyOf(d);return logs.filter(l=>l.date===k).reduce((a,l)=>a+(+l.minutes||0),0)});
+  const max=Math.max(60,...per,goal?Math.ceil(goal/7):0);
+  const top=Math.ceil(max/30)*30, W=420,H=150,L=34,B=24,T=10,cw=(W-L-6)/7;
+  const y=v=>T+(H-T-B)*(1-v/top);
+  let s="";
+  [0,top/2,top].forEach(v=>{s+=`<line x1="${L}" x2="${W-4}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10">${v}</text>`});
+  if(goal){const gy=y(goal/7);s+=`<line x1="${L}" x2="${W-4}" y1="${gy}" y2="${gy}" stroke="var(--gold)" stroke-dasharray="4 3" stroke-width="1.5"/><text x="${W-4}" y="${gy-4}" text-anchor="end" font-size="10" style="fill:var(--gold)">daily pace</text>`}
+  per.forEach((v,i)=>{const x=L+i*cw+cw*0.2,w=cw*0.6,yy=y(v),isT=i===6;
+    s+=`<rect x="${x}" y="${yy}" width="${w}" height="${Math.max(0,H-B-yy)}" rx="3" fill="${isT?"var(--tekhelet)":"color-mix(in srgb, var(--tekhelet) 55%, transparent)"}"><title>${v} min</title></rect>`;
+    s+=`<text x="${x+w/2}" y="${H-8}" text-anchor="middle" font-size="10.5">${last7[i].toLocaleDateString("en-GB",{weekday:"short"})}</text>`;
+    if(v)s+=`<text x="${x+w/2}" y="${yy-4}" text-anchor="middle" font-size="10">${v}</text>`;});
+  $("weekChart").innerHTML=s;
+  // subjects (all-time last 30 days)
+  const k30=keyOf(addDays(today,-29)), by={};
+  logs.filter(l=>l.date>=k30).forEach(l=>by[l.subject]=(by[l.subject]||0)+(+l.minutes||0));
+  const ent=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,5), m=ent.length?ent[0][1]:1;
+  $("subjectBars").innerHTML=ent.length?`<div class="label">Last 30 days by subject</div>`+ent.map(([n,v])=>`<div class="bar"><span>${esc(n)}</span><div class="track"><i style="width:${(v/m*100).toFixed(1)}%"></i></div><span class="num hint" style="text-align:right">${v} min</span></div>`).join(""):"";
+  // log list
+  $("logCount").textContent=logs.length?logs.length+" entr"+(logs.length===1?"y":"ies"):"";
+  $("logList").innerHTML=logs.length?logs.slice(0,25).map(l=>`<div class="item"><span class="chip">${esc(l.subject)}</span><span class="t">${esc(l.text||l.subject)}<small>${esc(new Date(l.date+"T12:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}))}</small></span><span class="num hint">${+l.minutes||0} min</span><button class="x" type="button" data-del-log="${esc(l.id)}" aria-label="Delete entry">✕</button></div>`).join(""):`<div class="empty">No learning logged yet. Add your first session above: what you learned and for how long. It feeds the weekly chart and your subject totals.</div>`;
+}
+$("logForm").addEventListener("submit",async e=>{
+  e.preventDefault(); if(!db){setStatus("Sign in to claude.ai to save entries.");return;}
+  const text=$("lText").value.trim(), minutes=Math.round(+$("lMin").value), subject=$("lSubject").value;
+  if(!minutes||minutes<1){$("lMin").focus();return;}
+  $("lAdd").disabled=true;
+  try{ await db.collection("learning").add({date:TODAY,subject,text,minutes,createdAt:Date.now()}); $("lText").value=""; }
+  catch(err){ setStatus("That entry didn't save. Check your connection and try again."); }
+  finally{ $("lAdd").disabled=false; }
+});
+$("logList").addEventListener("click",async e=>{const b=e.target.closest("[data-del-log]");if(!b||!db)return;b.disabled=true;try{await db.doc("learning/"+b.dataset.delLog).delete()}catch(_){b.disabled=false}});
+let goalTimer;
+$("goal").addEventListener("input",()=>{clearTimeout(goalTimer);goalTimer=setTimeout(async()=>{
+  const v=Math.max(0,Math.round(+$("goal").value||0)); if(v===settings.weeklyGoal)return;
+  settings=Object.assign({},settings,{weeklyGoal:v}); renderLearning();
+  if(db){try{await db.doc("settings/main").set(settings)}catch(_){}}
+},700)});
+
+/* tzedakah */
+$("tDate").value=TODAY;
+function renderTz(){
+  const mk=TODAY.slice(0,7), yk=TODAY.slice(0,4);
+  const mt=tz.filter(t=>t.date.startsWith(mk)).reduce((a,t)=>a+(+t.amount||0),0);
+  const yt=tz.filter(t=>t.date.startsWith(yk)).reduce((a,t)=>a+(+t.amount||0),0);
+  const gbp=v=>"£"+v.toLocaleString("en-GB",{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2});
+  $("tzMonth").textContent=tz.length?gbp(mt)+" this month · "+gbp(yt)+" in "+yk:"";
+  $("tzList").innerHTML=tz.length?tz.slice(0,15).map(t=>`<div class="item"><span class="chip gold num">${gbp(+t.amount||0)}</span><span class="t">${esc(t.cause||"Tzedakah")}<small>${esc(new Date(t.date+"T12:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}))}</small></span><span></span><button class="x" type="button" data-del-tz="${esc(t.id)}" aria-label="Delete gift">✕</button></div>`).join(""):`<div class="empty">No tzedakah recorded yet. Add a gift above to keep a running total for the month and the year, useful for ma'aser.</div>`;
+}
+$("tzForm").addEventListener("submit",async e=>{
+  e.preventDefault(); if(!db){setStatus("Sign in to claude.ai to save entries.");return;}
+  const amount=Math.round(+$("tAmt").value*100)/100, cause=$("tCause").value.trim(), date=$("tDate").value||TODAY;
+  if(!(amount>0)){$("tAmt").focus();return;}
+  $("tAdd").disabled=true;
+  try{ await db.collection("tzedakah").add({date,amount,cause,createdAt:Date.now()}); $("tAmt").value="";$("tCause").value=""; }
+  catch(err){ setStatus("That gift didn't save. Check your connection and try again."); }
+  finally{ $("tAdd").disabled=false; }
+});
+$("tzList").addEventListener("click",async e=>{const b=e.target.closest("[data-del-tz]");if(!b||!db)return;b.disabled=true;try{await db.doc("tzedakah/"+b.dataset.delTz).delete()}catch(_){b.disabled=false}});
+
+renderPractice(); renderLearning(); renderTz();
+
+/* ---------- Connect store ---------- */
+/* ---------- Local store: this copy saves on this device only ---------- */
+function makeLocalDb(){
+  const KEY="luach-db"; let data={};
+  try{ data=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(_){ data={}; }
+  const subs=new Set();
+  const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(data)); }catch(_){ } subs.forEach(f=>f()); };
+  const coll=n=>(data[n]=data[n]||{});
+  const snap=(id,b)=>({id,exists:!!b,data:()=>b,metadata:{fromCache:false,hasPendingWrites:false}});
+  const listen=run=>{ subs.add(run); setTimeout(run,0); return ()=>subs.delete(run); };
+  function docRef(n,id){ return {
+    set:async b=>{ coll(n)[id]=JSON.parse(JSON.stringify(b)); save(); },
+    delete:async()=>{ delete coll(n)[id]; save(); },
+    onSnapshot:next=>listen(()=>next(snap(id,coll(n)[id])))
+  }; }
+  function query(n,filters,order,lim){ return {
+    where:(f,op,v)=>query(n,filters.concat([[f,op,v]]),order,lim),
+    orderBy:(f,d)=>query(n,filters,[f,d||"asc"],lim),
+    limit:k=>query(n,filters,order,k),
+    doc:id=>docRef(n,id),
+    add:async b=>{ const id=Date.now().toString(36)+Math.random().toString(36).slice(2,8); coll(n)[id]=JSON.parse(JSON.stringify(b)); save(); return {id}; },
+    onSnapshot:next=>listen(()=>{
+      let rows=Object.entries(coll(n)).filter(([,b])=>filters.every(([f,op,v])=>op===">="?b[f]>=v:op==="=="?b[f]===v:true));
+      if(order)rows.sort((a,b)=>{const x=a[1][order[0]],y=b[1][order[0]];return (x<y?-1:x>y?1:0)*(order[1]==="desc"?-1:1);});
+      if(lim)rows=rows.slice(0,lim);
+      next({docs:rows.map(([id,b])=>snap(id,b)),metadata:{fromCache:false}});
+    })
+  }; }
+  window.addEventListener("storage",e=>{ if(e.key===KEY){ try{ data=JSON.parse(e.newValue||"{}")||{}; }catch(_){ } subs.forEach(f=>f()); } });
+  return { collection:n=>query(n,[],null,0), doc:p=>{ const [c,i]=p.split("/"); return docRef(c,i); } };
+}
+(async()=>{
+  db=makeLocalDb();
+  let pending=3;
+  const timer=setTimeout(()=>{ if(pending>0) setStatus("Your saved entries can't be reached yet. They'll appear when the connection returns."); },10000);
+  const ok=()=>{ if(--pending<=0){clearTimeout(timer); setStatus("");} };
+  const fail=()=>{ clearTimeout(timer); setStatus("Saved entries couldn't be loaded. Reload the page to try again."); };
+  const k60=keyOf(addDays(today,-400));
+  let seen1=false,seen2=false,seen3=false;
+  db.collection("days").where("date",">=",k60).onSnapshot(s=>{const o={};s.docs.forEach(d=>o[d.id]=d.data());days=o;renderPractice();if(!seen1&&!s.metadata.fromCache){seen1=true;ok();}},fail);
+  db.collection("learning").orderBy("createdAt","desc").limit(500).onSnapshot(s=>{logs=s.docs.map(d=>Object.assign({id:d.id},d.data()));logs.sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt);renderLearning();if(!seen2&&!s.metadata.fromCache){seen2=true;ok();}},fail);
+  db.collection("tzedakah").orderBy("date","desc").limit(500).onSnapshot(s=>{tz=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderTz();if(!seen3&&!s.metadata.fromCache){seen3=true;ok();}},fail);
+  db.doc("settings/main").onSnapshot(s=>{if(s.exists){settings=Object.assign({weeklyGoal:300},s.data());renderLearning();}});
+})();
+function offline(){
+  db=null;
+  $("logList").innerHTML=`<div class="empty">Sign in to claude.ai to keep a learning log here.</div>`;
+  $("tzList").innerHTML=`<div class="empty">Sign in to claude.ai to record tzedakah here.</div>`;
+}
+})();
+</script>
+
+</body>
+</html>

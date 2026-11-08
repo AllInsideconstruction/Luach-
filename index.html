@@ -208,6 +208,67 @@ details.sect .reader{max-height:none;border:0;background:transparent;padding:0 4
 details.note{margin:.3em 0}
 details.note summary{cursor:pointer;font-size:13px;color:var(--muted);direction:rtl;text-align:right}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* calendar */
+.calm{min-width:128px;text-align:center;font-size:15px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cw{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding-bottom:2px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.cc{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:1px;min-height:68px;padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);text-align:left;min-width:0;font:inherit}
+.cc:hover{border-color:var(--tekhelet)}
+.cc.out{opacity:.45}
+.cc.yt{background:var(--gold-soft)}
+.cc.fast{background:color-mix(in srgb,var(--warn) 10%,var(--surface))}
+.cc.chag{background:var(--tekhelet-soft)}
+.cc.today .cn{background:var(--tekhelet);color:var(--surface);border-radius:999px;padding:0 6px}
+.cc.sel{outline:2px solid var(--tekhelet);outline-offset:-1px}
+.cn{font-weight:700;font-size:14px;align-self:flex-start}
+.ch{position:absolute;top:5px;right:7px;font-size:13px;color:var(--muted)}
+.cl{font-size:11px;line-height:1.25;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cl.dim{color:var(--muted)}
+.cdots{display:flex;gap:3px;margin-top:auto}
+.cd{display:inline-block;width:7px;height:7px;border-radius:50%}
+.cd.yt{background:var(--gold)}.cd.fast{background:var(--warn)}.cd.rem{background:var(--good)}.cd.g{background:var(--tekhelet)}
+.calleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.calleg span{display:inline-flex;align-items:center;gap:5px}
+.gstat:empty{display:none}
+/* day list */
+.daylist{display:flex;flex-direction:column}
+.di{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.di:first-child{border-top:0}
+.di .dt{color:var(--muted);font-size:13px}
+.di .dtt{overflow-wrap:anywhere}
+.di .dtt small{display:block;color:var(--muted);font-size:12px}
+.di.lab .dtt{font-weight:700}
+.di.lab.yt .dtt{color:var(--gold)}.di.lab.fast .dtt{color:var(--warn)}.di.lab.chag .dtt{color:var(--tekhelet)}
+.di.zman .dtt{color:var(--muted)}
+.di.zman.strong .dtt{color:var(--ink);font-weight:600}
+.di.rem .dtt{font-weight:600}
+.di.rem.done .dtt{text-decoration:line-through;color:var(--muted);font-weight:400}
+.di.g .dtt a{color:var(--tekhelet);font-weight:600;text-decoration:none}
+.di.g .dtt a:hover{text-decoration:underline}
+.dact{display:flex;gap:4px;align-items:center}
+.mini2{border:1px solid var(--good);background:var(--good-soft);color:var(--good);border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600}
+.mini2.ghost2{border-color:var(--line);background:transparent;color:var(--muted)}
+.x.warn{color:var(--warn);font-size:12.5px;font-weight:600}
+details.addrem>summary{list-style:none;display:inline-block;cursor:pointer}
+details.addrem>summary::-webkit-details-marker{display:none}
+details.addrem[open]>summary{margin-bottom:10px}
+.remform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.remform .field:first-child,.remform .wide{grid-column:1/-1}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px}
+.chk input{width:auto}
+.formrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.shabbos-alerts{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border-top:1px solid var(--line);padding-top:12px}
+/* alert bar */
+.alertbar{display:flex;flex-direction:column;gap:6px}
+.al{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:12px 16px}
+.al b{color:var(--gold)}
+@media (max-width:540px){
+  .cc{min-height:54px;padding:4px}
+  .ch{position:static;font-size:11px}
+  .cl{font-size:9.5px}
+  .cw{font-size:10px;letter-spacing:0}
+  .al{grid-template-columns:minmax(0,1fr)}
+}
 @media (max-width:860px){
   .band .wrap{grid-template-columns:1fr}
   .span-5,.span-7,.span-6{grid-column:span 12}
@@ -266,6 +327,37 @@ details.note summary{cursor:pointer;font-size:13px;color:var(--muted);direction:
 
 <main>
   <div class="wrap">
+
+    <div class="alertbar span-12" id="alertBar" role="alert" hidden></div>
+
+    <section class="panel span-7" aria-labelledby="calH">
+      <div class="phead"><h2 id="calH">Calendar</h2>
+        <span class="tools"><button type="button" class="sz" id="calPrev" aria-label="Previous month">‹</button><b class="calm" id="calMonth"></b><button type="button" class="sz" id="calNext" aria-label="Next month">›</button><button type="button" class="sz" id="calToday">Today</button></span></div>
+      <div class="cal" id="calGrid" role="grid" aria-labelledby="calMonth"></div>
+      <div class="calleg"><span><i class="cd yt"></i>Shabbos &amp; Yom Tov</span><span><i class="cd fast"></i>Fast</span><span><i class="cd rem"></i>Your reminder</span><span><i class="cd g"></i>Google Calendar</span><span>Friday time = candle lighting</span></div>
+      <div class="gstat hint" id="gStatus"></div>
+    </section>
+
+    <section class="panel span-5" aria-labelledby="dayH">
+      <div class="phead"><h2 id="dayH">Today</h2><span class="hint" id="dayHe"></span></div>
+      <div class="daylist" id="dayList"></div>
+      <details class="addrem" id="remDetails">
+        <summary class="btn ghost">Add a reminder</summary>
+        <form class="remform" id="remForm" autocomplete="off">
+          <div class="field"><label for="rTitle">Reminder</label><input id="rTitle" maxlength="100" placeholder="e.g. Yahrzeit, call Rabbi, pay rent" required></div>
+          <div class="field"><label for="rDate">Date</label><input id="rDate" type="date" required></div>
+          <div class="field"><label for="rTime">Time (optional)</label><input id="rTime" type="time"></div>
+          <div class="field wide"><label for="rRepeat">Repeats</label>
+            <select class="in" id="rRepeat"><option value="once">Just once</option><option value="daily">Every day</option><option value="weekly">Every week</option><option value="monthly">Every month (same date)</option><option value="yearly">Every year (English date)</option><option value="hebyearly">Every year (Hebrew date, e.g. yahrzeit)</option></select></div>
+          <label class="chk wide" id="rPhoneRow"><input type="checkbox" id="rPhone"> <span id="rPhoneLabel">Also alert my phone</span></label>
+          <div class="wide formrow"><button class="btn" type="submit" id="rAdd">Save reminder</button><span class="hint" id="rMsg" role="status"></span></div>
+        </form>
+      </details>
+      <div class="shabbos-alerts">
+        <button type="button" class="btn ghost" id="candleAlerts">Alert my phone for candle lighting</button>
+        <span class="hint" id="candleMsg" role="status">Adds the next 8 Fridays at your current location.</span>
+      </div>
+    </section>
 
     <section class="panel span-7" aria-labelledby="dafH">
       <div class="phead"><h2 id="dafH">Daf Yomi</h2><span class="hint num" id="dafCycle"></span></div>
@@ -800,7 +892,272 @@ function renderDevotions(){
 }
 loadJSON("tehillim.json").then(j=>{TEH=j;renderDevotions();}).catch(()=>{tehErr=true;renderDevotions();});
 loadJSON("siddur.json").then(j=>{SID=j;renderDevotions();}).catch(()=>{sidErr=true;renderDevotions();});
-setInterval(()=>{ if(document.visibilityState==="visible"){ const k=kodeshNow(new Date()); const was=$("tBody").querySelector(".kodesh")?true:false; const z=renderZmanimList(new Date()); renderRing(new Date(),z); if(!!k!==was)renderDevotions(); } },60000);
+setInterval(()=>{ if(document.visibilityState==="visible"){ const k=kodeshNow(new Date()); const was=$("tBody").querySelector(".kodesh")?true:false; const z=renderZmanimList(new Date()); renderRing(new Date(),z); checkDue(); if(!!k!==was)renderDevotions(); } },60000);
+
+/* ---------- Calendar, reminders, Google Calendar ---------- */
+let reminders=[], gEvents={}, gWeek={}, gState="off", gMsg="", calMonth=new Date(today.getFullYear(),today.getMonth(),1,12), selKey=TODAY;
+const fromKey=k=>new Date(k+"T12:00:00");
+function dayLabels(d){
+  const hd=heb(d), m=hd.month, day=hd.day, dow=d.getDay(), isr=isIsrael(), L=[], add=(t,k)=>L.push({t,k});
+  const adar=m==="Adar"||m==="Adar II";
+  if(dow===6)add("Shabbos","yt");
+  if(m==="Elul"&&day===29)add("Erev Rosh Hashanah","minor");
+  if(m==="Tishri"){
+    if(day===1||day===2)add("Rosh Hashanah","yt");
+    if((day===3&&dow!==6)||(day===4&&dow===0))add("Tzom Gedaliah","fast");
+    if(day===9)add("Erev Yom Kippur","minor");
+    if(day===10)add("Yom Kippur","yt");
+    if(day===14)add("Erev Sukkos","minor");
+    if(day===15||(!isr&&day===16))add("Sukkos","yt");
+    if(day>=(isr?16:17)&&day<=20)add("Chol Hamoed","chag");
+    if(day===21)add("Hoshana Rabbah","chag");
+    if(day===22)add(isr?"Shemini Atzeres & Simchas Torah":"Shemini Atzeres","yt");
+    if(!isr&&day===23)add("Simchas Torah","yt");
+  }
+  if(day===30||(day===1&&m!=="Tishri"))add("Rosh Chodesh","chag");
+  for(let i=0;i<8;i++){const x=heb(addDays(d,-i));if(x.month==="Kislev"&&x.day===25){add("Chanukah "+(i+1),"chag");break;}}
+  if(m==="Tevet"&&day===10)add("Asara B'Teves","fast");
+  if(m==="Shevat"&&day===15)add("Tu BiShvat","minor");
+  if(adar){ if((day===13&&dow!==6)||(day===11&&dow===4))add("Taanis Esther","fast"); if(day===14)add("Purim","chag"); if(day===15)add("Shushan Purim","minor"); }
+  if(m==="Adar I"&&day===14)add("Purim Katan","minor");
+  if(m==="Nisan"){
+    if(day===14)add("Erev Pesach","minor");
+    if(day===15||(!isr&&day===16))add("Pesach","yt");
+    if(day>=(isr?16:17)&&day<=20)add("Chol Hamoed","chag");
+    if(day===21||(!isr&&day===22))add("Pesach","yt");
+  }
+  if(m==="Iyar"&&day===14)add("Pesach Sheni","minor");
+  if(m==="Iyar"&&day===18)add("Lag BaOmer","minor");
+  if(m==="Sivan"&&day===5)add("Erev Shavuos","minor");
+  if(m==="Sivan"&&(day===6||(!isr&&day===7)))add("Shavuos","yt");
+  if(m==="Tamuz"&&((day===17&&dow!==6)||(day===18&&dow===0)))add("17 Tammuz","fast");
+  if(m==="Av"&&((day===9&&dow!==6)||(day===10&&dow===0)))add("Tisha B'Av","fast");
+  if(m==="Av"&&day===15)add("Tu B'Av","minor");
+  return L;
+}
+const adarAlias=(a,b)=>a===b||((a==="Adar"&&(b==="Adar I"||b==="Adar II"))||((a==="Adar I"||a==="Adar II")&&b==="Adar"));
+function occursOn(r,d){
+  const k=keyOf(d); if(k<r.date)return false;
+  const s=fromKey(r.date);
+  switch(r.repeat){
+    case "daily": return true;
+    case "weekly": return d.getDay()===s.getDay();
+    case "monthly": return d.getDate()===s.getDate();
+    case "yearly": return d.getDate()===s.getDate()&&d.getMonth()===s.getMonth();
+    case "hebyearly": { const a=heb(d); return a.day===r.hday&&adarAlias(r.hmonth,a.month); }
+    default: return k===r.date;
+  }
+}
+const remsOn=d=>reminders.filter(r=>occursOn(r,d)).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
+const REPEAT_TXT={once:"",daily:"Every day",weekly:"Every week",monthly:"Every month",yearly:"Every year",hebyearly:"Every year on the Hebrew date"};
+/* month grid */
+function renderCalendar(){
+  const first=new Date(calMonth), start=addDays(first,-first.getDay());
+  $("calMonth").textContent=first.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  const h1=heb(first), h2=heb(new Date(first.getFullYear(),first.getMonth()+1,0,12));
+  $("calMonth").title=(EN_MONTH[h1.month]||h1.month)+(h1.month!==h2.month?" – "+(EN_MONTH[h2.month]||h2.month):"")+" "+h2.year;
+  let h=["Sun","Mon","Tue","Wed","Thu","Fri","Shabbos"].map(x=>`<div class="cw" role="columnheader">${x}</div>`).join("");
+  for(let i=0;i<42;i++){
+    const d=addDays(start,i), k=keyOf(d), hd=heb(d), out=d.getMonth()!==first.getMonth();
+    if(i===35&&out)break;
+    const labs=dayLabels(d), rs=remsOn(d), gs=gEvents[k]||[];
+    const main=labs.find(l=>l.k!=="yt"||l.t!=="Shabbos")||labs[0];
+    const kind=labs.some(l=>l.k==="yt")?" yt":labs.some(l=>l.k==="fast")?" fast":labs.some(l=>l.k==="chag")?" chag":"";
+    let candle="";
+    if(d.getDay()===5){ const ss=sunsetUTC(d.getFullYear(),d.getMonth()+1,d.getDate(),place.lat,place.lng); if(ss)candle=new Date(ss-place.cl*6e4).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:place.tz}); }
+    h+=`<button type="button" role="gridcell" class="cc${kind}${out?" out":""}${k===TODAY?" today":""}${k===selKey?" sel":""}" data-k="${k}" aria-label="${d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}, ${hd.day} ${EN_MONTH[hd.month]||hd.month}${labs.length?", "+labs.map(l=>l.t).join(", "):""}${rs.length?", "+rs.length+" reminder"+(rs.length>1?"s":""):""}${gs.length?", "+gs.length+" calendar event"+(gs.length>1?"s":""):""}">
+      <span class="cn num">${d.getDate()}</span><span class="ch he">${gem(hd.day).replace(/[״׳]/g,"")}</span>
+      ${main?`<span class="cl">${esc(main.t)}</span>`:candle?`<span class="cl dim num">${candle}</span>`:""}
+      <span class="cdots">${rs.length?'<i class="cd rem"></i>':""}${gs.length?'<i class="cd g"></i>':""}</span></button>`;
+  }
+  $("calGrid").innerHTML=h;
+}
+$("calGrid").addEventListener("click",e=>{const b=e.target.closest(".cc");if(!b)return;selKey=b.dataset.k;renderCalendar();renderDay();});
+$("calPrev").addEventListener("click",()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1,12);renderCalendar();watchGoogle();});
+$("calNext").addEventListener("click",()=>{calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1,12);renderCalendar();watchGoogle();});
+$("calToday").addEventListener("click",()=>{calMonth=new Date(today.getFullYear(),today.getMonth(),1,12);selKey=TODAY;renderCalendar();renderDay();watchGoogle();});
+/* selected day: schedule */
+function renderDay(){
+  const d=fromKey(selKey), hd=heb(d), isToday=selKey===TODAY;
+  $("dayH").textContent=isToday?"Today":d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  $("dayHe").textContent=hd.day+" "+(EN_MONTH[hd.month]||hd.month)+" "+hd.year;
+  const tf=dt=>dt.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:place.tz});
+  const items=[];
+  dayLabels(d).forEach(l=>items.push({sort:"00:00",time:"",title:l.t,kind:"lab "+l.k}));
+  const z=zmanimFor(d);
+  if(z){ items.push({sort:tf(z.sunrise),time:tf(z.sunrise),title:"Netz (sunrise)",kind:"zman"}); items.push({sort:tf(z.sunset),time:tf(z.sunset),title:"Shkiah (sunset)",kind:"zman"});
+    if(d.getDay()===5)items.push({sort:tf(new Date(z.sunset-place.cl*6e4)),time:tf(new Date(z.sunset-place.cl*6e4)),title:"Candle lighting",kind:"zman strong"}); }
+  remsOn(d).forEach(r=>{ const done=!!(r.done&&r.done[selKey]); items.push({sort:r.time||"99:99",time:r.time||"",title:r.title,kind:"rem"+(done?" done":""),r,done}); });
+  (gEvents[selKey]||gWeek[selKey]||[]).forEach(g=>items.push({sort:g.time||"00:01",time:g.time||"All day",title:g.title,kind:"g",link:g.link}));
+  items.sort((a,b)=>a.sort.localeCompare(b.sort));
+  let h=items.map(it=>{
+    if(it.r)return `<div class="di ${it.kind}"><span class="dt num">${esc(it.time)}</span><span class="dtt">${esc(it.title)}<small>${esc(REPEAT_TXT[it.r.repeat]||"")}${it.r.gcal?(REPEAT_TXT[it.r.repeat]?" · ":"")+"on your phone":""}</small></span><span class="dact"><button type="button" class="mini2" data-done="${esc(it.r.id)}" aria-pressed="${it.done}">${it.done?"Done ✓":"Done"}</button><button type="button" class="x" data-del-rem="${esc(it.r.id)}" aria-label="Delete reminder">✕</button></span></div>`;
+    if(it.kind==="g")return `<div class="di g"><span class="dt num">${esc(it.time)}</span><span class="dtt">${it.link?`<a href="${esc(it.link)}" target="_blank" rel="noopener">${esc(it.title)}</a>`:esc(it.title)}<small>Google Calendar</small></span><span></span></div>`;
+    return `<div class="di ${it.kind}"><span class="dt num">${esc(it.time)}</span><span class="dtt">${esc(it.title)}</span><span></span></div>`;
+  }).join("");
+  if(!reminders.length&&!items.some(i=>i.r))h+=`<div class="empty">No reminders yet. Add one below: a yahrzeit, a call to make, or a bill to pay. It shows here on the day and on the calendar.</div>`;
+  $("dayList").innerHTML=h;
+  if(!$("remDetails").open||!$("rDate").value)$("rDate").value=selKey;
+  $("gStatus").textContent=gMsg;
+}
+async function saveRem(r){ if(!db)return; const {id,...body}=r; await db.collection("reminders").doc(id).set(body); }
+$("dayList").addEventListener("click",async e=>{
+  const dn=e.target.closest("[data-done]"), dl=e.target.closest("[data-del-rem]");
+  if(dn){ const r=reminders.find(x=>x.id===dn.dataset.done); if(!r)return; const done=Object.assign({},r.done); if(done[selKey])delete done[selKey]; else done[selKey]=true;
+    // keep only recent ticks so the document stays small
+    Object.keys(done).sort().slice(0,-120).forEach(k=>delete done[k]);
+    const nr=Object.assign({},r,{done}); reminders=reminders.map(x=>x.id===r.id?nr:x); renderDay(); checkDue();
+    try{ await saveRem(nr); }catch(_){ setStatus("That didn't save. Your browser may be blocking storage for this site."); } }
+  if(dl){ if(dl.dataset.confirm!=="1"){ dl.dataset.confirm="1"; dl.textContent="Delete?"; dl.classList.add("warn"); setTimeout(()=>{ if(dl.isConnected){dl.dataset.confirm="";dl.textContent="✕";dl.classList.remove("warn");} },4000); return; }
+    dl.disabled=true; try{ await db.collection("reminders").doc(dl.dataset.delRem).delete(); }catch(_){ dl.disabled=false; } }
+});
+/* in-page alerts while the app is open */
+const dismissed=new Set();
+function checkDue(){
+  const now=new Date(), nowHM=pad(now.getHours())+":"+pad(now.getMinutes());
+  const due=remsOn(today).filter(r=>r.time&&r.time<=nowHM&&!(r.done&&r.done[TODAY])&&!dismissed.has(r.id));
+  const bar=$("alertBar");
+  if(!due.length){ bar.hidden=true; bar.innerHTML=""; return; }
+  bar.hidden=false;
+  bar.innerHTML=due.map(r=>`<div class="al"><b>Reminder · ${esc(r.time)}</b><span>${esc(r.title)}</span><span class="dact"><button type="button" class="mini2" data-adone="${esc(r.id)}">Done</button><button type="button" class="mini2 ghost2" data-later="${esc(r.id)}">Hide</button></span></div>`).join("");
+}
+$("alertBar").addEventListener("click",async e=>{
+  const l=e.target.closest("[data-later]"), d=e.target.closest("[data-adone]");
+  if(l){ dismissed.add(l.dataset.later); checkDue(); }
+  if(d){ const r=reminders.find(x=>x.id===d.dataset.adone); if(!r)return; const nr=Object.assign({},r,{done:Object.assign({},r.done,{[TODAY]:true})}); reminders=reminders.map(x=>x.id===r.id?nr:x); checkDue(); renderDay(); try{await saveRem(nr);}catch(_){} }
+});
+/* ---- phone alerts: Google Calendar (claude.ai) or a calendar file (GPS app) ---- */
+let mcp=null, gUnsubs=[];
+const isoLocal=dt=>{ const p={}; new Intl.DateTimeFormat("en-GB",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23",timeZone:place.tz}).formatToParts(dt).forEach(x=>p[x.type]=x.value); return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:00`; };
+function nextOccurrences(r,n){ const out=[]; let d=fromKey(r.date); if(d<today)d=new Date(today); for(let i=0;i<4000&&out.length<n;i++){ const x=addDays(d,i); if(occursOn(r,x))out.push(x);} return out; }
+function remStart(r,d){ const [hh,mm]=(r.time||"09:00").split(":"); const x=new Date(d); x.setHours(+hh,+mm,0,0); return x; }
+const BYDAY=["SU","MO","TU","WE","TH","FR","SA"];
+function rruleFor(r){ const s=fromKey(r.date); return {daily:"RRULE:FREQ=DAILY",weekly:"RRULE:FREQ=WEEKLY;BYDAY="+BYDAY[s.getDay()],monthly:"RRULE:FREQ=MONTHLY;BYMONTHDAY="+s.getDate(),yearly:"RRULE:FREQ=YEARLY"}[r.repeat]||null; }
+function gErrText(e){
+  switch(e&&e.code){
+    case "needs_reauth": return "Google Calendar needs reconnecting: claude.ai Settings → Connectors.";
+    case "server_not_connected": case "selection_required": return "Connect Google Calendar in claude.ai Settings → Connectors to see your events here.";
+    case "not_in_manifest": case "approval_required": case "consent_required": return "Google Calendar isn't allowed for this page yet.";
+    case "blocked_by_policy": return "Your organisation doesn't allow Google Calendar here.";
+    default: return "Google Calendar couldn't be reached just now.";
+  }
+}
+async function phoneAlertGoogle(r){
+  const occ=nextOccurrences(r,r.repeat==="hebyearly"?10:1); if(!occ.length)return "No upcoming date for this reminder.";
+  const st=remStart(r,occ[0]), input={summary:r.title,startTime:isoLocal(st),endTime:isoLocal(new Date(+st+15*6e4)),timeZone:place.tz,overrideReminders:[{method:"popup",minutes:0}],description:"Added from Yehuda's Luach"};
+  if(!r.time){ input.allDay=true; input.startTime=keyOf(occ[0])+"T00:00:00"; input.endTime=keyOf(addDays(occ[0],1))+"T00:00:00"; input.overrideReminders=[{method:"popup",minutes:15*60}]; }
+  const rr=rruleFor(r);
+  if(rr)input.recurrenceData=[rr];
+  else if(r.repeat==="hebyearly"){ // Hebrew dates move on the English calendar: list the next ten years explicitly
+    const tz=place.tz, f=d=>r.time?keyOf(d).replace(/-/g,"")+"T"+r.time.replace(":","")+"00":keyOf(d).replace(/-/g,"");
+    input.recurrenceData=[r.time?`RDATE;TZID=${tz}:${occ.slice(1).map(f).join(",")}`:`RDATE;VALUE=DATE:${occ.slice(1).map(f).join(",")}`];
+  }
+  await mcp.callTool("Google Calendar","create_event",input);
+  mcp.invalidate("Google Calendar").catch(()=>{});
+  return null;
+}
+function icsDate(d){ return d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,""); }
+function icsFile(evs){
+  const lines=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Yehudas Luach//EN","CALSCALE:GREGORIAN"];
+  const escI=s=>String(s).replace(/[\\,;]/g,m=>"\\"+m).replace(/\n/g,"\\n");
+  evs.forEach((e,i)=>{ lines.push("BEGIN:VEVENT","UID:"+Date.now()+"-"+i+"@luach","DTSTAMP:"+icsDate(new Date()),"DTSTART:"+icsDate(e.start),"DTEND:"+icsDate(new Date(+e.start+(e.mins||15)*6e4)),"SUMMARY:"+escI(e.title));
+    if(e.rrule)lines.push(e.rrule);
+    lines.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+escI(e.title),"TRIGGER:-PT"+(e.before||0)+"M","END:VALARM","END:VEVENT"); });
+  lines.push("END:VCALENDAR"); return lines.join("\r\n");
+}
+function downloadIcs(name,text){
+  const url=URL.createObjectURL(new Blob([text],{type:"text/calendar"}));
+  const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+function phoneAlertIcs(r){
+  const occ=nextOccurrences(r,r.repeat==="hebyearly"?10:1); if(!occ.length)return "No upcoming date for this reminder.";
+  const rr=rruleFor(r);
+  const evs=(rr?occ.slice(0,1):occ).map(d=>({title:r.title,start:remStart(r,d),rrule:rr}));
+  downloadIcs("reminder.ics",icsFile(evs)); return null;
+}
+$("remForm").addEventListener("submit",async e=>{
+  e.preventDefault(); if(!db){ $("rMsg").textContent="Sign in to claude.ai to save reminders."; return; }
+  const title=$("rTitle").value.trim(), date=$("rDate").value, time=$("rTime").value, repeat=$("rRepeat").value, phone=$("rPhone").checked;
+  if(!title||!date)return;
+  const hd=heb(fromKey(date));
+  const r={title,date,time,repeat,hmonth:hd.month,hday:hd.day,createdAt:Date.now(),done:{},gcal:false};
+  $("rAdd").disabled=true; $("rMsg").textContent="Saving…";
+  try{
+    const ref=await db.collection("reminders").add(r); r.id=ref.id;
+    let note="Saved.";
+    if(phone){
+      try{
+        const err=mcp?await phoneAlertGoogle(r):phoneAlertIcs(r);
+        if(err)note="Saved, but "+err;
+        else if(mcp){ r.gcal=true; await saveRem(r); note="Saved and added to your Google Calendar, which will alert your phone."; }
+        else note="Saved. Open the downloaded calendar file to add the alert to your phone.";
+      }catch(ge){
+        const amb=ge&&(ge.code==="server_unavailable"||ge.code==="upstream_error"||ge.code==="cancelled");
+        note="Saved here. "+(amb?"Google Calendar didn't confirm, so check there before trying again.":gErrText(ge));
+      }
+    }
+    $("rMsg").textContent=note; $("rTitle").value=""; $("rTime").value=""; $("rPhone").checked=false;
+  }catch(_){ $("rMsg").textContent="That reminder didn't save. Check your connection and try again."; }
+  finally{ $("rAdd").disabled=false; }
+});
+$("candleAlerts").addEventListener("click",async()=>{
+  const b=$("candleAlerts"); b.disabled=true;
+  const fr=[]; let d=addDays(today,(5-today.getDay()+7)%7); for(let i=0;i<8;i++){ const x=addDays(d,7*i); const ss=sunsetUTC(x.getFullYear(),x.getMonth()+1,x.getDate(),place.lat,place.lng); if(ss)fr.push({d:x,start:new Date(ss-place.cl*6e4)}); }
+  const where=$("whereTown").textContent||place.n;
+  try{
+    if(mcp){
+      $("candleMsg").textContent="Adding to Google Calendar…"; let n=0;
+      for(const f of fr){ const t=f.start.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:place.tz});
+        await mcp.callTool("Google Calendar","create_event",{summary:"Candle lighting "+t+" ("+where+")",startTime:isoLocal(f.start),endTime:isoLocal(new Date(+f.start+15*6e4)),timeZone:place.tz,overrideReminders:[{method:"popup",minutes:60},{method:"popup",minutes:0}],description:"Approximate time, from Yehuda's Luach. Check your local luach."}); n++; }
+      mcp.invalidate("Google Calendar").catch(()=>{});
+      $("candleMsg").textContent="Added "+n+" Fridays to Google Calendar for "+where+", with alerts an hour before and at the time.";
+    } else {
+      downloadIcs("candle-lighting.ics",icsFile(fr.map(f=>({title:"Candle lighting "+f.start.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:place.tz})+" ("+where+")",start:f.start,before:60}))));
+      $("candleMsg").textContent="Downloaded 8 Fridays for "+where+". Open the file to add them to your phone's calendar.";
+    }
+  }catch(ge){
+    const amb=ge&&(ge.code==="server_unavailable"||ge.code==="upstream_error"||ge.code==="cancelled");
+    $("candleMsg").textContent=amb?"Google Calendar didn't confirm. Some Fridays may have been added, so check there before trying again.":gErrText(ge);
+  }finally{ b.disabled=false; }
+});
+function parseEvents(payload){
+  const out={}, list=(payload&&payload.events)||[];
+  list.forEach(ev=>{
+    if(ev.status==="cancelled")return;
+    const title=ev.summary||"(No title)", link=ev.htmlLink||"";
+    if(ev.start&&ev.start.dateTime){ const s=new Date(ev.start.dateTime); const k=keyOf(s); (out[k]=out[k]||[]).push({title,link,time:pad(s.getHours())+":"+pad(s.getMinutes())}); }
+    else if(ev.start&&ev.start.date){ let s=fromKey(ev.start.date); const e=ev.end&&ev.end.date?fromKey(ev.end.date):addDays(s,1); for(let i=0;i<62&&s<e;i++,s=addDays(s,1)){ const k=keyOf(s); (out[k]=out[k]||[]).push({title,link,time:""}); } }
+  });
+  return out;
+}
+function watchGoogle(){
+  if(!mcp)return;
+  gUnsubs.forEach(u=>u()); gUnsubs=[];
+  const first=new Date(calMonth), start=addDays(first,-first.getDay()), end=addDays(start,42);
+  const onEv=(which)=>ev=>{
+    if(ev.type==="data"){ const p=parseEvents(ev.result.payload); if(which==="m")gEvents=p; else gWeek=p; gState="ok"; gMsg=ev.result.cache&&ev.result.cache.revalidating?"Updating Google Calendar…":""; }
+    else{ const c=ev.error&&ev.error.code; if(["needs_reauth","server_not_connected","blocked_by_policy","approval_required","not_in_manifest","selection_required","consent_required"].includes(c)){ gEvents={}; gWeek={}; } gState="err"; gMsg=gErrText(ev.error)+(c==="approval_required"||c==="not_in_manifest"||c==="consent_required"?" Tap Show my Google Calendar to allow it.":""); $("gAllow").hidden=false; }
+    renderCalendar(); renderDay();
+  };
+  gUnsubs.push(mcp.watchTool("Google Calendar","list_events",{startTime:keyOf(start)+"T00:00:00",endTime:keyOf(end)+"T00:00:00",orderBy:"startTime",pageSize:250},onEv("m"),{refetchInterval:300000}));
+  if(today<start||today>=end)gUnsubs.push(mcp.watchTool("Google Calendar","list_events",{startTime:TODAY+"T00:00:00",endTime:keyOf(addDays(today,1))+"T00:00:00",orderBy:"startTime",pageSize:50},onEv("w"),{refetchInterval:300000}));
+}
+$("gStatus").insertAdjacentHTML("afterend",`<button type="button" class="btn ghost" id="gAllow" hidden>Show my Google Calendar</button>`);
+$("gAllow").addEventListener("click",async()=>{
+  if(!mcp)return; $("gAllow").disabled=true;
+  try{ await mcp.callTool("Google Calendar","list_events",{startTime:TODAY+"T00:00:00",endTime:keyOf(addDays(today,1))+"T00:00:00",pageSize:10}); $("gAllow").hidden=true; watchGoogle(); }
+  catch(e){ gMsg=gErrText(e); renderDay(); } finally{ $("gAllow").disabled=false; }
+});
+(async()=>{
+  if(GPS_ENABLED||!window.claude||!window.claude.use){
+    gMsg="Your Google Calendar shows in the claude.ai version of the luach."; $("rPhoneLabel").textContent="Also add to my phone's calendar (downloads a calendar file)";
+    $("candleMsg").textContent="Downloads the next 8 Fridays at your current location as a calendar file with alerts."; renderDay(); return;
+  }
+  mcp=await window.claude.use("mcp");
+  if(!mcp){ gMsg="Google Calendar isn't available in this view."; $("rPhoneRow").hidden=true; $("candleAlerts").hidden=true; $("candleMsg").hidden=true; renderDay(); return; }
+  $("rPhoneLabel").textContent="Also alert my phone (adds it to Google Calendar)";
+  watchGoogle();
+})();
 
 /* ---------- State ---------- */
 const PRACTICES=[
@@ -918,7 +1275,7 @@ $("tzForm").addEventListener("submit",async e=>{
 });
 $("tzList").addEventListener("click",async e=>{const b=e.target.closest("[data-del-tz]");if(!b||!db)return;b.disabled=true;try{await db.doc("tzedakah/"+b.dataset.delTz).delete()}catch(_){b.disabled=false}});
 
-renderPractice(); renderLearning(); renderTz(); renderDevotions();
+renderPractice(); renderLearning(); renderTz(); renderDevotions(); renderCalendar(); renderDay();
 
 /* ---------- Connect store ---------- */
 /* ---------- Local store: this copy saves on this device only ---------- */
@@ -963,6 +1320,7 @@ function makeLocalDb(){
   db.collection("learning").orderBy("createdAt","desc").limit(500).onSnapshot(s=>{logs=s.docs.map(d=>Object.assign({id:d.id},d.data()));logs.sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt-a.createdAt);renderLearning();if(!seen2&&!s.metadata.fromCache){seen2=true;ok();}},fail);
   db.collection("tzedakah").orderBy("date","desc").limit(500).onSnapshot(s=>{tz=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderTz();if(!seen3&&!s.metadata.fromCache){seen3=true;ok();}},fail);
   db.doc("settings/main").onSnapshot(s=>{if(s.exists){settings=Object.assign({weeklyGoal:300},s.data());renderLearning();}});
+  db.collection("reminders").orderBy("createdAt","asc").limit(500).onSnapshot(s=>{reminders=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderCalendar();renderDay();checkDue();},()=>{$("dayList").insertAdjacentHTML("afterbegin",`<div class="notice">Your reminders couldn't be loaded. Reload the page to try again.</div>`);});
 })();
 function offline(){
   db=null;

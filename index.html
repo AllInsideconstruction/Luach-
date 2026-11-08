@@ -140,6 +140,48 @@ svg text{fill:var(--muted);font-family:var(--f-body)}
 .goal{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .goal input{width:72px;padding:4px 8px}
 
+/* zmanim */
+.znow{background:var(--tekhelet-soft);color:var(--tekhelet);border-radius:10px;padding:10px 12px;font-weight:600}
+.zlist{display:flex;flex-direction:column}
+.zr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 0;border-top:1px solid var(--line);align-items:center}
+.zr:first-child{border-top:0}
+.zr small{display:block;color:var(--muted);font-size:12px}
+.zr.past{opacity:.55}
+.zr.next b{color:var(--tekhelet)}
+/* readers */
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+select.in.small{width:auto;padding:5px 8px;font-size:13px}
+.sz{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:4px 9px;font-weight:700}
+.reader{max-height:70vh;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:10px;padding:6px 16px 12px;background:var(--bg)}
+.reader .he,.reader p.he{font-family:var(--f-display);font-size:var(--rs,21px);line-height:1.85;direction:rtl;text-align:right;margin:.5em 0}
+.reader h4{font-size:calc(var(--rs,21px) * 1.05);margin:.8em 0 .2em;display:flex;justify-content:space-between;gap:10px;align-items:baseline;color:var(--tekhelet)}
+.reader h4 .cnum{font-family:var(--f-body);font-size:12px;color:var(--muted);direction:ltr}
+.reader sup{font-family:var(--f-body);font-size:.5em;color:var(--gold);margin-inline:2px 4px;vertical-align:super}
+.reader small{font-family:var(--f-body);font-size:.62em;color:var(--muted);line-height:1.5}
+.reader big{font-size:1.15em}
+.treadbar{display:flex;gap:8px;flex-wrap:wrap}
+details.missed{margin-top:10px;border-top:1px dashed var(--line);padding-top:6px}
+details.missed summary,details.sect>summary{cursor:pointer;font-weight:600;color:var(--tekhelet);padding:6px 0}
+.src{font-size:12px;color:var(--muted);margin:0}
+.kodesh{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;padding:28px 16px;border-radius:10px;background:var(--gold-soft);color:var(--ink)}
+.kodesh b{font-family:var(--f-display);font-size:26px;color:var(--gold)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 14px;font-weight:600}
+.tabs button[aria-selected="true"]{background:var(--tekhelet);border-color:var(--tekhelet);color:var(--surface)}
+.pnotes{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.pnotes .label{grid-column:1/-1}
+.pn{background:var(--bg);border-radius:10px;padding:9px 12px;display:flex;flex-direction:column;font-size:13.5px}
+.pn b{color:var(--tekhelet)}
+.svh{font-size:28px;margin:0;color:var(--tekhelet)}
+.svcwrap{max-height:75vh;overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:10px;padding:8px 16px;background:var(--bg);margin-bottom:6px}
+details.sect{border-top:1px solid var(--line)}
+details.sect>summary{font-size:16px;padding:10px 0}
+details.sect .reader{max-height:none;border:0;background:transparent;padding:0 4px}
+.part h5,.subh{font-family:var(--f-body);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:1.2em 0 .2em;direction:ltr;text-align:left}
+.subh{color:var(--gold)}
+details.note{margin:.3em 0}
+details.note summary{cursor:pointer;font-size:13px;color:var(--muted);direction:rtl;text-align:right}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:860px){
   .band .wrap{grid-template-columns:1fr}
   .span-5,.span-7,.span-6{grid-column:span 12}
@@ -208,6 +250,30 @@ svg text{fill:var(--muted);font-family:var(--f-body)}
     <section class="panel span-5" aria-labelledby="chagH">
       <div class="phead"><h2 id="chagH">Coming up</h2><span class="hint">Diaspora dates</span></div>
       <div class="chaglist" id="chagList"></div>
+    </section>
+
+    <section class="panel span-5" aria-labelledby="zH">
+      <div class="phead"><h2 id="zH">Zmanim today</h2><span class="hint" id="zPlace"></span></div>
+      <div class="znow" id="zNow" hidden></div>
+      <div class="zlist" id="zList"></div>
+      <p class="hint">Approximate. Gra and Magen Avraham shown where they differ.</p>
+    </section>
+
+    <section class="panel span-7" aria-labelledby="tH">
+      <div class="phead"><h2 id="tH">Daily Tehillim</h2>
+        <span class="tools"><label for="tMode" class="sr">Cycle</label><select class="in small" id="tMode"><option value="monthly">Monthly cycle</option><option value="weekly">Weekly cycle</option></select>
+        <button type="button" class="sz" data-size="-2" aria-label="Smaller text">A−</button><button type="button" class="sz" data-size="2" aria-label="Larger text">A+</button></span></div>
+      <div class="hint" id="tHead"></div>
+      <div id="tBody"><div class="empty">Loading Tehillim…</div></div>
+    </section>
+
+    <section class="panel span-12" aria-labelledby="pH">
+      <div class="phead"><h2 id="pH">Tefillos</h2><span class="hint">Weekday · Nusach Ashkenaz</span></div>
+      <div class="tabs" id="pTabs" role="tablist">
+        <button type="button" role="tab" data-svc="shacharit">Shacharis</button><button type="button" role="tab" data-svc="mincha">Mincha</button><button type="button" role="tab" data-svc="maariv">Maariv</button><button type="button" role="tab" data-svc="bentching">Birkat Hamazon</button>
+      </div>
+      <div class="pnotes" id="pNotes"></div>
+      <div id="pBody"><div class="empty">Loading the siddur…</div></div>
     </section>
 
     <section class="panel span-6" aria-labelledby="practiceH">
@@ -362,22 +428,27 @@ const CITIES={
   sydney:{n:"Sydney",lat:-33.8688,lng:151.2093,tz:"Australia/Sydney",cl:18},
   melbourne:{n:"Melbourne",lat:-37.8136,lng:144.9631,tz:"Australia/Melbourne",cl:18}
 };
-function sunsetUTC(y,m,d,lat,lng){
+/* NOAA "Almanac for Computers" sun position. zenith 90.833 = sunrise/sunset; 90+deg for twilight at deg below the horizon. */
+function solarUTC(y,m,d,lat,lng,zenith,rising){
   const rad=Math.PI/180;
   const N=Math.round((Date.UTC(y,m-1,d)-Date.UTC(y,0,0))/864e5);
-  const lngHour=lng/15,t=N+((18-lngHour)/24);
+  const lngHour=lng/15,t=N+(((rising?6:18)-lngHour)/24);
   const M=0.9856*t-3.289;
   let L=M+1.916*Math.sin(M*rad)+0.020*Math.sin(2*M*rad)+282.634; L=(L+360)%360;
   let RA=Math.atan(0.91764*Math.tan(L*rad))/rad; RA=(RA+360)%360;
   RA+= (Math.floor(L/90)*90-Math.floor(RA/90)*90); RA/=15;
   const sinDec=0.39782*Math.sin(L*rad),cosDec=Math.cos(Math.asin(sinDec));
-  const cosH=(Math.cos(90.833*rad)-sinDec*Math.sin(lat*rad))/(cosDec*Math.cos(lat*rad));
+  const cosH=(Math.cos(zenith*rad)-sinDec*Math.sin(lat*rad))/(cosDec*Math.cos(lat*rad));
   if(cosH<-1||cosH>1)return null;
-  const H=Math.acos(cosH)/rad/15;
+  let H=Math.acos(cosH)/rad; if(rising)H=360-H; H/=15;
   const T=H+RA-0.06571*t-6.622;
   const UT=((T-lngHour)%24+24)%24;
-  return new Date(Date.UTC(y,m-1,d)+UT*36e5);
+  let ms=Date.UTC(y,m-1,d)+UT*36e5;
+  const noon=Date.UTC(y,m-1,d,12)-lngHour*36e5; // keep the result on this local day
+  while(ms-noon>12*36e5)ms-=864e5; while(noon-ms>12*36e5)ms+=864e5;
+  return new Date(ms);
 }
+function sunsetUTC(y,m,d,lat,lng){ return solarUTC(y,m,d,lat,lng,90.833,false); }
 /* Auto: follow the device's time zone, which changes when Yehuda travels */
 let deviceTz=""; try{ deviceTz=Intl.DateTimeFormat().resolvedOptions().timeZone||""; }catch(e){}
 const TZ_ALIAS={"America/Montreal":"America/Toronto","Asia/Tel_Aviv":"Asia/Jerusalem","Europe/Belfast":"Europe/London","America/Buenos_Aires":"America/Argentina/Buenos_Aires"};
@@ -493,6 +564,7 @@ function renderZmanim(){
   $("havdalah").textContent=ssS?tf(new Date(+ssS+50*6e4)):"—";
   const dd=Math.round((fri-today)/864e5);
   $("shabbatIn").textContent=dow===6?"Shabbat today · "+gshort(fri):dd===0?"Erev Shabbat today":"Shabbat in "+dd+" day"+(dd===1?"":"s")+" · "+gshort(fri);
+  if(devReady)renderDevotions();
 }
 renderZmanim();
 $("city").addEventListener("change",e=>{cityChoice=e.target.value;lsSet("luach-city",cityChoice);resolveCity();renderZmanim();if(cityChoice==="custom"&&!spot)$("spot").focus();refreshGps();});
@@ -501,6 +573,164 @@ $("gpsNow").addEventListener("click",refreshGps);
 refreshGps();
 /* Re-check when the page comes back into view, e.g. after landing somewhere new */
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState!=="visible")return; try{ const t=Intl.DateTimeFormat().resolvedOptions().timeZone; if(t&&t!==deviceTz){deviceTz=t;resolveCity();renderZmanim();} }catch(_){ } refreshGps(); });
+
+/* ---------- Zmanim, Shabbos / Yom Tov, Tehillim and Tefillot ---------- */
+const isIsrael=()=>place.tz==="Asia/Jerusalem";
+const YT_DIASPORA=[["Tishri",1],["Tishri",2],["Tishri",10],["Tishri",15],["Tishri",16],["Tishri",22],["Tishri",23],["Nisan",15],["Nisan",16],["Nisan",21],["Nisan",22],["Sivan",6],["Sivan",7]];
+const YT_ISRAEL=[["Tishri",1],["Tishri",2],["Tishri",10],["Tishri",15],["Tishri",22],["Nisan",15],["Nisan",21],["Sivan",6]];
+function kodeshDay(d){
+  if(d.getDay()===6)return "Shabbos";
+  const hd=heb(d);
+  return (isIsrael()?YT_ISRAEL:YT_DIASPORA).some(([m,x])=>hd.month===m&&hd.day===x)?"Yom Tov":null;
+}
+function zmanimFor(d){
+  const y=d.getFullYear(),m=d.getMonth()+1,dd=d.getDate(),{lat,lng}=place;
+  const z=(zen,rise)=>solarUTC(y,m,dd,lat,lng,zen,rise);
+  const sr=z(90.833,true),ss=z(90.833,false);
+  if(!sr||!ss)return null;
+  const hr=(ss-sr)/12, at=h=>new Date(+sr+h*hr);
+  const alot=z(106.1,true),tzeit=z(98.5,false),misheyakir=z(101.5,true);
+  const mga=alot&&tzeit?(tzeit-alot)/12:null;
+  const chatzot=at(6);
+  return {alot,misheyakir,sunrise:sr,shmaMga:mga?new Date(+alot+3*mga):null,shma:at(3),tefillah:at(4),chatzot,
+    minchaG:new Date(+chatzot+Math.max(hr/2,30*6e4)),minchaK:at(9.5),plag:at(10.75),sunset:ss,tzeit};
+}
+function kodeshNow(now){
+  const t=new Date(now); t.setHours(12,0,0,0);
+  const kToday=kodeshDay(t), kTom=kodeshDay(addDays(t,1));
+  if(kToday){ const z=zmanimFor(t); const end=z&&z.tzeit?z.tzeit:(z?new Date(+z.sunset+50*6e4):null); if(!end||now<end)return kToday; }
+  if(kTom){ const z=zmanimFor(t); if(z&&now>=new Date(+z.sunset-(place.cl||18)*6e4))return kTom; }
+  return null;
+}
+const ZROWS=[["alot","Alos hashachar","Dawn (16.1°)"],["misheyakir","Misheyakir","Earliest tallis and tefillin"],["sunrise","Netz","Sunrise"],["shmaMga","Sof zman Shema","Magen Avraham"],["shma","Sof zman Shema","Gra"],["tefillah","Sof zman Tefillah","Latest Shacharis (Gra)"],["chatzot","Chatzos","Midday"],["minchaG","Mincha gedolah","Earliest Mincha"],["minchaK","Mincha ketanah",""],["plag","Plag hamincha",""],["sunset","Shkiah","Sunset"],["tzeit","Tzeis hakochavim","Nightfall (8.5°), Maariv"]];
+function renderZmanimList(now){
+  const z=zmanimFor(today), tf=dt=>dt.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:place.tz});
+  if(!z){$("zList").innerHTML=`<div class="empty">The sun doesn't rise or set here today, so zmanim can't be worked out.</div>`;return;}
+  let nextDone=false;
+  $("zList").innerHTML=ZROWS.filter(([k])=>z[k]).map(([k,name,sub])=>{
+    const past=z[k]<now, next=!past&&!nextDone; if(next)nextDone=true;
+    return `<div class="zr${past?" past":""}${next?" next":""}"><span><b>${name}</b>${sub?`<small>${sub}</small>`:""}</span><span class="num">${next?'<span class="chip">next</span> ':""}${tf(z[k])}</span></div>`;
+  }).join("");
+  $("zPlace").textContent=$("whereTown").textContent||place.n;
+  // what to daven now
+  let now1="";
+  if(now<z.sunrise&&(!z.alot||now>=z.alot))now1="Before sunrise: Shacharis may be said from alos; ideally wait for netz.";
+  else if(now>=z.sunrise&&now<z.tefillah)now1="Time for Shacharis, until "+tf(z.tefillah)+".";
+  else if(now>=z.tefillah&&now<z.chatzot)now1="Shacharis: past sof zman tefillah. It may still be said until chatzos ("+tf(z.chatzot)+").";
+  else if(now>=z.minchaG&&now<z.sunset)now1="Time for Mincha, until shkiah at "+tf(z.sunset)+".";
+  else if(now>=z.chatzot&&now<z.minchaG)now1="Mincha from "+tf(z.minchaG)+".";
+  else if(z.tzeit&&now>=z.tzeit)now1="Time for Maariv.";
+  else if(now>=z.sunset)now1="After shkiah. Maariv from tzeis at "+(z.tzeit?tf(z.tzeit):"nightfall")+".";
+  $("zNow").textContent=now1; $("zNow").hidden=!now1;
+  return z;
+}
+/* Daily Tehillim */
+const MONTHLY=[[1,9],[10,17],[18,22],[23,28],[29,34],[35,38],[39,43],[44,48],[49,54],[55,59],[60,65],[66,68],[69,71],[72,76],[77,78],[79,82],[83,87],[88,89],[90,96],[97,103],[104,105],[106,107],[108,112],[113,118],[119,119,1,96],[119,119,97,176],[120,134],[135,139],[140,144],[145,150]];
+const WEEKLY=[[1,29],[30,50],[51,72],[73,89],[90,106],[107,119],[120,150]];
+function portionFor(d,mode){
+  if(mode==="weekly"){const r=WEEKLY[d.getDay()];return {from:r[0],to:r[1],label:d.toLocaleDateString("en-GB",{weekday:"long"})+"'s Tehillim"};}
+  const hd=heb(d); let r=MONTHLY[hd.day-1];
+  if(hd.day===29&&heb(addDays(d,1)).day===1)r=[140,150];
+  return {from:r[0],to:r[1],v1:r[2],v2:r[3],label:"Day "+hd.day+" of "+(EN_MONTH[hd.month]||hd.month)};
+}
+const portionText=p=>p.v1?"Tehillim 119:"+p.v1+"–"+p.v2:(p.from===p.to?"Tehillim "+p.from:"Tehillim "+p.from+"–"+p.to);
+let tMode="monthly"; try{ tMode=localStorage.getItem("luach-tmode")||"monthly"; }catch(_){}
+let readSize=21; try{ readSize=+localStorage.getItem("luach-readsize")||21; }catch(_){}
+let TEH=null, SID=null, tehErr=false, sidErr=false;
+function loadJSON(path){ return fetch(path).then(r=>{ if(!r.ok)throw new Error(path); return r.json(); }); }
+function chaptersHtml(p){
+  let h="";
+  for(let c=p.from;c<=p.to;c++){
+    const vs=TEH.chapters[c-1]; const a=p.v1?p.v1:1, b=p.v2?p.v2:vs.length;
+    h+=`<h4 class="he">תהילים ${gem(c).replace(/[״׳]/g,"")}<span class="cnum">${c}${p.v1?":"+a+"–"+b:""}</span></h4><p class="he read">`;
+    for(let v=a;v<=b;v++)h+=`<sup>${gem(v).replace(/[״׳]/g,"")}</sup>${esc(vs[v-1])} `;
+    h+="</p>";
+  }
+  return h;
+}
+function renderTehillim(k){
+  if(k){ $("tBody").innerHTML=`<div class="kodesh"><b>${k==="Shabbos"?"Shabbat Shalom":"Gut Yom Tov"}</b><span>Tehillim returns after ${k}. Today's portion will be waiting for you.</span></div>`; $("tHead").textContent=""; return; }
+  const p=portionFor(today,tMode);
+  // catch up the portions that fell on Shabbos / Yom Tov
+  const missed=[]; for(let i=1;i<=3;i++){ const d=addDays(today,-i); if(kodeshDay(d))missed.unshift({d,p:portionFor(d,tMode)}); else break; }
+  $("tHead").textContent=p.label+" · "+portionText(p);
+  if(!TEH){ $("tBody").innerHTML=`<div class="empty">${tehErr?"Tehillim couldn't load. Check your connection and reopen the page.":"Loading Tehillim…"}</div>`; return; }
+  const said=isOn(TODAY,"tehillim");
+  let h=`<div class="treadbar"><button type="button" class="btn${said?" done":""}" id="tSaid" aria-pressed="${said}">${said?"Said today ✓":"Mark Tehillim said"}</button></div>`;
+  h+=`<div class="reader" style="--rs:${readSize}px">`+chaptersHtml(p);
+  missed.forEach(m=>{ h+=`<details class="missed"><summary>From ${kodeshDay(m.d)} (${m.d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}): ${portionText(m.p)}</summary>${chaptersHtml(m.p)}</details>`; });
+  h+=`</div><p class="src">${esc(TEH.source)}</p>`;
+  $("tBody").innerHTML=h;
+}
+$("tBody").addEventListener("click",e=>{ if(e.target.closest("#tSaid"))toggle(TODAY,"tehillim"); });
+$("tMode").value=tMode;
+$("tMode").addEventListener("change",e=>{tMode=e.target.value;try{localStorage.setItem("luach-tmode",tMode)}catch(_){}renderDevotions();});
+function setSize(n){ readSize=Math.min(34,Math.max(16,n)); try{localStorage.setItem("luach-readsize",readSize)}catch(_){} document.querySelectorAll(".reader").forEach(r=>r.style.setProperty("--rs",readSize+"px")); }
+document.querySelectorAll("[data-size]").forEach(b=>b.addEventListener("click",()=>setSize(readSize+(+b.dataset.size))));
+/* Today's additions to the tefillah (Ashkenaz) */
+function tefillahNotes(d){
+  const hd=heb(d), m=hd.month, day=hd.day, isr=isIsrael(), dow=d.getDay(), out=[];
+  const adar=m==="Adar"||m==="Adar II";
+  const rc=day===30||(day===1&&m!=="Tishri");
+  let chanukah=0; for(let i=0;i<8;i++){const x=heb(addDays(d,-i));if(x.month==="Kislev"&&x.day===25){chanukah=i+1;break;}}
+  const cholHamoed=(m==="Tishri"&&day>=(isr?16:17)&&day<=21)||(m==="Nisan"&&day>=(isr?16:17)&&day<=20);
+  const fast=(m==="Tishri"&&((day===3&&dow!==6)||(day===4&&dow===0)))||(m==="Tevet"&&day===10)||(adar&&((day===13&&dow!==6)||(day===11&&dow===4)))||(m==="Tamuz"&&((day===17&&dow!==6)||(day===18&&dow===0)))||(m==="Av"&&((day===9&&dow!==6)||(day===10&&dow===0)));
+  if(rc)out.push(["Rosh Chodesh","Yaaleh Veyavo in Shemoneh Esrei and Birkat Hamazon; half Hallel; Torah reading; Musaf."]);
+  if(chanukah)out.push(["Chanukah, day "+chanukah,"Al Hanisim in Shemoneh Esrei and Birkat Hamazon; full Hallel; Torah reading."]);
+  if(adar&&day===14)out.push(["Purim","Al Hanisim in Shemoneh Esrei and Birkat Hamazon. Megillah."]);
+  if(cholHamoed)out.push(["Chol Hamoed","Yaaleh Veyavo in Shemoneh Esrei and Birkat Hamazon; "+(m==="Nisan"?"half":"full")+" Hallel; Musaf."+(m==="Tishri"&&day===21?" Hoshana Rabbah.":"")]);
+  if(m==="Tishri"&&day>=3&&day<=9)out.push(["Aseres Yemei Teshuvah","HaMelech HaKadosh, HaMelech HaMishpat, Zochreinu, Mi Chamocha, Uchsov, Uvesefer; Avinu Malkeinu."]);
+  if(fast)out.push(["Fast day","Aneinu (at Mincha, or in the chazan's repetition at Shacharis)."+(m==="Av"?" Kinnos; no Tachanun.":" Avinu Malkeinu; Selichos.")]);
+  const ord=["Tishri","Heshvan","Kislev","Tevet","Shevat","Adar","Adar I","Adar II","Nisan","Iyar","Sivan","Tamuz","Av","Elul"].indexOf(m);
+  const winter=(m==="Tishri"&&day>=22)||(ord>=1&&ord<=7)||(m==="Nisan"&&day<15);
+  out.push([winter?"Mashiv haruach":"Summer",winter?"Say Mashiv haruach umorid hageshem.":"Don't say Mashiv haruach umorid hageshem."]);
+  let talUmatar;
+  if(isr) talUmatar=(m==="Heshvan"&&day>=7)||(ord>=2&&ord<=7)||(m==="Nisan"&&day<15);
+  else { // outside Israel: from Maariv on 4 December (5 December before a civil leap year) until Pesach
+    const ny=d.getFullYear()+1, startDay=((ny%4===0&&ny%100!==0)||ny%400===0)?5:4;
+    talUmatar=(d.getMonth()===11&&d.getDate()>startDay)||(d.getMonth()<=4&&((ord>=3&&ord<=7)||(m==="Nisan"&&day<15)));
+    if(d.getMonth()===11&&d.getDate()===startDay)out.push(["Tonight","Begin Vesein tal umatar at Maariv tonight."]); }
+  out.push([talUmatar?"Vesein tal umatar":"Vesein berachah",talUmatar?"Say Vesein tal umatar livrachah in Bareich Aleinu.":"Say Vesein berachah in Bareich Aleinu."]);
+  const noTach=rc||chanukah||m==="Nisan"||(m==="Iyar"&&(day===14||day===18))||(m==="Sivan"&&day<=12)||(m==="Av"&&(day===9||day===15||(day===10&&dow===0)))||(m==="Tishri"&&day>=9)||(m==="Shevat"&&day===15)||((adar||m==="Adar I")&&(day===14||day===15))||cholHamoed;
+  if(noTach)out.push(["No Tachanun","Tachanun is not said today."]);
+  else if(dow===1||dow===4)out.push([dow===1?"Monday":"Thursday","Longer Tachanun (Vehu Rachum) and Torah reading at Shacharis."]);
+  const om=omerDay(heb(addDays(d,1)));
+  if(om)out.push(["Sefiras HaOmer","Tonight after Maariv, count day "+om+"."]);
+  return out;
+}
+let svc=null;
+function defaultService(z,now){ if(!z)return "shacharit"; if(now<z.chatzot)return "shacharit"; if(now<z.sunset)return "mincha"; return "maariv"; }
+function partHtml(n,depth){
+  if(n.p){
+    return `<div class="part"><h5>${esc(n.t)}</h5>`+n.p.map(x=>{
+      const plain=x.replace(/<[^>]+>/g,"");
+      if(/^<small>[^]*<\/small>$/.test(x)&&plain.length>180)return `<details class="note"><summary>הערה</summary><p class="he">${x}</p></details>`;
+      return `<p class="he">${x}</p>`;
+    }).join("")+`</div>`;
+  }
+  const inner=n.c.map(k=>partHtml(k,depth+1)).join("");
+  return depth===0?`<details class="sect"><summary>${esc(n.t)}</summary><div class="reader" style="--rs:${readSize}px">${inner}</div></details>`:`<div class="sub"><h5 class="subh">${esc(n.t)}</h5>${inner}</div>`;
+}
+function renderTefillot(k,z,now){
+  if(k){ $("pBody").innerHTML=`<div class="kodesh"><b>${k==="Shabbat"||k==="Shabbos"?"Shabbat Shalom":"Gut Yom Tov"}</b><span>Weekday tefillos return after ${k}.</span></div>`; $("pTabs").hidden=true; $("pNotes").hidden=true; return; }
+  $("pTabs").hidden=false; $("pNotes").hidden=false;
+  if(!svc)svc=defaultService(z,now);
+  document.querySelectorAll("#pTabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.svc===svc));
+  $("pNotes").innerHTML=`<div class="label">Today in davening</div>`+tefillahNotes(today).map(([a,b])=>`<div class="pn"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join("");
+  if(!SID){ $("pBody").innerHTML=`<div class="empty">${sidErr?"The siddur couldn't load. Check your connection and reopen the page.":"Loading the siddur…"}</div>`; return; }
+  const s=SID.services.find(x=>x.id===svc);
+  $("pBody").innerHTML=`<div class="svcwrap"><h3 class="he svh">${s.he}</h3>`+s.c.map(n=>partHtml(n,0)).join("")+`</div><p class="src">${esc(SID.source)}</p>`;
+  const first=$("pBody").querySelector("details.sect"); if(first)first.open=true;
+}
+$("pTabs").addEventListener("click",e=>{const b=e.target.closest("button[data-svc]");if(!b)return;svc=b.dataset.svc;renderDevotions();});
+var devReady=true;
+function renderDevotions(){
+  const now=new Date(), z=renderZmanimList(now), k=kodeshNow(now);
+  renderTehillim(k); renderTefillot(k,z,now);
+}
+loadJSON("tehillim.json").then(j=>{TEH=j;renderDevotions();}).catch(()=>{tehErr=true;renderDevotions();});
+loadJSON("siddur.json").then(j=>{SID=j;renderDevotions();}).catch(()=>{sidErr=true;renderDevotions();});
+setInterval(()=>{ if(document.visibilityState==="visible"){ const k=kodeshNow(new Date()); const was=$("tBody").querySelector(".kodesh")?true:false; renderZmanimList(new Date()); if(!!k!==was)renderDevotions(); } },60000);
 
 /* ---------- State ---------- */
 const PRACTICES=[
@@ -528,6 +758,7 @@ function renderPractice(){
   $("dafBtn").textContent=done?"Learned today ✓":"Mark today's daf learned";
   $("dafBtn").className="btn"+(done?" done":"");
   $("dafBtn").setAttribute("aria-pressed",done);
+  const tb=$("tSaid"); if(tb){ const s=isOn(TODAY,"tehillim"); tb.textContent=s?"Said today ✓":"Mark Tehillim said"; tb.className="btn"+(s?" done":""); tb.setAttribute("aria-pressed",s); }
 }
 const busy=new Set();
 async function toggle(k,p){
@@ -616,7 +847,7 @@ $("tzForm").addEventListener("submit",async e=>{
 });
 $("tzList").addEventListener("click",async e=>{const b=e.target.closest("[data-del-tz]");if(!b||!db)return;b.disabled=true;try{await db.doc("tzedakah/"+b.dataset.delTz).delete()}catch(_){b.disabled=false}});
 
-renderPractice(); renderLearning(); renderTz();
+renderPractice(); renderLearning(); renderTz(); renderDevotions();
 
 /* ---------- Connect store ---------- */
 /* ---------- Local store: this copy saves on this device only ---------- */

@@ -2,6 +2,8 @@
 
 **Live app:** https://allinsideconstruction.github.io/Luach-/
 
+This repository also holds a separate **Meeting Recorder** app at https://allinsideconstruction.github.io/Luach-/recorder/. See [recorder/README.md](recorder/README.md).
+
 A copy of the luach that asks the phone for its GPS position, so candle lighting, havdalah and the daily zmanim are worked out for exactly where you are.
 
 ## How it handles location
@@ -10,9 +12,6 @@ A copy of the luach that asks the phone for its GPS position, so candle lighting
 - The last position is remembered, so the times show straight away even before the new GPS fix arrives.
 - The top of the dashboard shows the town you're in ("You're in Salford"). To get the town name, the phone sends its rough position (to about 1 km) to BigDataCloud's free lookup service, once per new place. If that service can't be reached, it shows the nearest city on the built-in list instead.
 - It does not run in the background or keep a history of where you have been.
-
-## Sections
-A bar along the bottom splits the luach into five sections: **Today** (date, day circle, today's schedule, zmanim and checklist), **Calendar** (month view and coming chagim), **Learning** (Daf Yomi, weekly stats and log), **Siddur** (Tehillim and tefillos) and **Tools** (location and tzedakah). Tap "You're in…" at the top to change your location. Under the date, a gold line gives the Hebrew date that starts at shkiah.
 
 ## Your day circle
 At the top, a 24-hour circle shows your day: midnight at the bottom and midday at the top. The gold band is daylight (netz to shkiah), with dawn and dusk shaded either side. The dotted outer arcs are the times for Shacharis, Mincha and Maariv, and each turns green once you tick it off in the daily practice checklist. The inner green ring fills as you complete the checklist. The white hand is now, and the middle shows the next zman and how long until it.
@@ -33,15 +32,6 @@ At the top, a 24-hour circle shows your day: midnight at the bottom and midday a
 ### Text sources
 - Tehillim: *Tanach with Nikkud* (tanach.us), via Sefaria. Public domain. File: `tehillim.json`.
 - Siddur: *The Metsudah Siddur* (1981), Nusach Sefard, via Sefaria. CC-BY. File: `siddur.json`.
-
-## Meeting recorder
-Open **Tools → Meeting recorder** (or go straight to `meetings.html`) to record a meeting with the phone's microphone.
-- Tap the red button to start, the square to stop and save. **Pause** and **Discard** are next to it.
-- **Live transcript** writes down the words as you speak (Chrome on Android, Safari on iPhone). It is automatic and can contain mistakes; the audio is always kept.
-- **Bookmarks** mark a key moment with a note. Tap the time later to jump to that point in the playback.
-- **Keep screen on** stops the phone from sleeping, because most phones stop recording when the screen locks. Keep the page open while recording.
-- Saved meetings can be played back, renamed, searched, shared, and downloaded as audio (.m4a or .webm) and as a text file of the notes, bookmarks and transcript.
-- Recordings are saved **in this browser on this phone only** and are never uploaded. Download anything important. Remember to tell people in the meeting that you are recording.
 
 ## Where your entries are saved
 The checklist, learning log, tzedakah and weekly goal are saved **in this browser on this phone only**. They don't sync with the claude.ai version or with other devices. Clearing the browser's site data deletes them.

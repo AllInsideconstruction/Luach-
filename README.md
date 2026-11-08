@@ -34,6 +34,15 @@ At the top, a 24-hour circle shows your day: midnight at the bottom and midday a
 - Tehillim: *Tanach with Nikkud* (tanach.us), via Sefaria. Public domain. File: `tehillim.json`.
 - Siddur: *The Metsudah Siddur* (1981), Nusach Sefard, via Sefaria. CC-BY. File: `siddur.json`.
 
+## Meeting recorder
+Open **Tools → Meeting recorder** (or go straight to `meetings.html`) to record a meeting with the phone's microphone.
+- Tap the red button to start, the square to stop and save. **Pause** and **Discard** are next to it.
+- **Live transcript** writes down the words as you speak (Chrome on Android, Safari on iPhone). It is automatic and can contain mistakes; the audio is always kept.
+- **Bookmarks** mark a key moment with a note. Tap the time later to jump to that point in the playback.
+- **Keep screen on** stops the phone from sleeping, because most phones stop recording when the screen locks. Keep the page open while recording.
+- Saved meetings can be played back, renamed, searched, shared, and downloaded as audio (.m4a or .webm) and as a text file of the notes, bookmarks and transcript.
+- Recordings are saved **in this browser on this phone only** and are never uploaded. Download anything important. Remember to tell people in the meeting that you are recording.
+
 ## Where your entries are saved
 The checklist, learning log, tzedakah and weekly goal are saved **in this browser on this phone only**. They don't sync with the claude.ai version or with other devices. Clearing the browser's site data deletes them.
 

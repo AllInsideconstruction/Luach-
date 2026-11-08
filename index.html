@@ -472,6 +472,12 @@ button.where{font:inherit;border:0;cursor:pointer;text-align:left}
       <div class="list" id="tzList"><div class="empty">Loading tzedakah…</div></div>
     </section>
 
+    <section class="panel span-6" data-tab="tools" aria-labelledby="mtgH">
+      <div class="phead"><h2 id="mtgH">Meeting recorder</h2><span class="hint">Audio, notes and live transcript</span></div>
+      <p class="hint" style="margin:0">Record a meeting on this phone, add bookmarks and notes as you go, then play it back, download it or share it.</p>
+      <div><a class="btn" href="meetings.html" style="display:inline-block;text-decoration:none">Open meeting recorder</a></div>
+    </section>
+
     <p class="hint span-12" data-tab="tools" id="status">Zmanim are approximate (candle lighting before sunset, havdalah 50 minutes after). Check your local luach for exact times.</p>
   </div>
 </main>
@@ -933,7 +939,7 @@ loadJSON("siddur.json").then(j=>{SID=j;renderDevotions();}).catch(()=>{sidErr=tr
 setInterval(()=>{ if(document.visibilityState==="visible"){ const k=kodeshNow(new Date()); const was=$("tBody").querySelector(".kodesh")?true:false; const z=renderZmanimList(new Date()); renderRing(new Date(),z); checkDue(); if(!!k!==was)renderDevotions(); } },60000);
 
 /* ---------- Sections (bottom bar) ---------- */
-const TABS={today:["Today",""],calendar:["Calendar","Month view, chagim and your reminders"],learning:["Learning","Daf Yomi, your weekly learning and log"],siddur:["Siddur","Tehillim and weekday tefillos"],tools:["Tools","Location and tzedakah"]};
+const TABS={today:["Today",""],calendar:["Calendar","Month view, chagim and your reminders"],learning:["Learning","Daf Yomi, your weekly learning and log"],siddur:["Siddur","Tehillim and weekday tefillos"],tools:["Tools","Location, tzedakah and meeting recorder"]};
 let curTab="today";
 function showTab(t,scroll){
   if(!TABS[t])t="today";

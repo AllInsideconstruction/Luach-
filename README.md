@@ -1,49 +1,31 @@
-# Yehuda's Luach (GPS edition)
+# Yehuda's Luach
 
 **Live app:** https://allinsideconstruction.github.io/Luach-/
 
-A copy of the luach that asks the phone for its GPS position, so candle lighting, havdalah and the daily zmanim are worked out for exactly where you are.
+A daily Jewish life and learning app. This is the GPS edition: it asks the phone for its location, so zmanim and Shabbos times are worked out for exactly where you are.
 
-## How it handles location
-- Choose **Follow my GPS** in the "Times for" box (it is the default in this copy).
-- The phone asks for location permission the first time. After that it updates each time you open the page or switch back to it.
-- The last position is remembered, so the times show straight away even before the new GPS fix arrives.
-- The top of the dashboard shows the town you're in ("You're in Salford"). To get the town name, the phone sends its rough position (to about 1 km) to BigDataCloud's free lookup service, once per new place. If that service can't be reached, it shows the nearest city on the built-in list instead.
-- It does not run in the background or keep a history of where you have been.
+## Sections (bottom bar on phones, tabs on a computer)
+- **Today**: Hebrew date (and the date that starts after shkiah), "Times are for…" with quick location switching, **My day** circle with your own schedule (Edit times), zmanim, a davening checklist (Shacharis, Mincha, Maariv, Tefillin), today's reminders, this week's parsha with candle lighting and havdalah, what's coming up, and today's learning.
+- **Calendar**: month view with Hebrew dates, Yom Tov, fasts and Rosh Chodesh; yahrzeits, Hebrew birthdays and anniversaries; **reminders** (once, daily, weekly, monthly, yearly, or yearly on the Hebrew date), with an alert bar when one is due while the app is open.
+- **Learning**: Ha'amek Davar on the weekly parsha (one aliyah a day, with Onkelos and Rashi, and a bookmark), Daf Yomi, Tehillim on the monthly cycle, 14-day streaks, and a learning log with minutes by subject.
+- **Siddur**: Nusach Sefard weekday tefillos and brachos, opened at the right tefillah for the time of day, with a "Today in davening" box (Yaaleh Veyavo, Al Hanisim, Morid hatal or Mashiv haruach, Barcheinu or Bareich Aleinu, Tachanun, Omer).
+- **Tools**: meat and dairy timer, Omer counter, tzedakah with a monthly goal, and a brachos guide.
 
-## Sections
-A bar along the bottom splits the luach into five sections: **Today** (date, day circle, today's schedule, zmanim and checklist), **Calendar** (month view and coming chagim), **Learning** (Daf Yomi, weekly stats and log), **Siddur** (Tehillim and tefillos) and **Tools** (location and tzedakah). Tap "You're in…" at the top to change your location. Under the date, a gold line gives the Hebrew date that starts at shkiah.
+On Shabbos and Yom Tov, from candle lighting until nightfall, the Siddur and Tehillim show "Shabbat Shalom" or "Gut Yom Tov" instead of the text.
 
-## Your day circle
-At the top, a 24-hour circle shows your day: midnight at the bottom and midday at the top. The gold band is daylight (netz to shkiah), with dawn and dusk shaded either side. The dotted outer arcs are the times for Shacharis, Mincha and Maariv, and each turns green once you tick it off in the daily practice checklist. The inner green ring fills as you complete the checklist. The white hand is now, and the middle shows the next zman and how long until it.
+## Phone alerts
+Tick "Also add to my phone's calendar" when saving a reminder, or tap **Alert my phone for candle lighting** in the Calendar tab. This app downloads a calendar file (.ics); open it and your phone adds the events with alerts, so they work even when the app is closed. A Hebrew-date reminder adds the next 10 years. (The claude.ai version adds them straight to Google Calendar and shows your Google events.)
 
-## Calendar and reminders
-- **Calendar**: a month view with English and Hebrew dates. Shabbos and Yom Tov are shaded gold, Rosh Chodesh and chagim blue, and fasts amber. Fridays show candle-lighting time. Tap a day to see its schedule.
-- **Today**: netz, shkiah, candle lighting, chagim and your reminders for the selected day, in time order.
-- **Reminders**: add your own, either once, every day, every week, every month, every year, or every year on the Hebrew date (for a yahrzeit). While the app is open, a bar appears at the top when one is due. Tick **Done** to clear it for the day.
-- **Phone alerts**: tick "Also add to my phone's calendar" when saving a reminder, or tap **Alert my phone for candle lighting**. This copy downloads a calendar file (.ics); open it and your phone adds the events with alerts, so they work even when the app is closed. A Hebrew-date reminder adds the next 10 years.
-- **Google Calendar**: your Google events show only in the claude.ai version, which can also add reminders straight to Google Calendar.
+## Location
+The app asks the phone for its position each time it opens and looks up the town name (it sends the rough position to BigDataCloud's free lookup service). You can also pick a city or enter coordinates. It never runs in the background or keeps a history of where you've been.
 
-## Zmanim, Tehillim and Tefillos (weekdays)
-- **Zmanim today** for your GPS position: alos, misheyakir, netz, sof zman Shema (Magen Avraham and Gra), sof zman tefillah, chatzos, mincha gedolah and ketanah, plag, shkiah and tzeis. The next zman is highlighted, with a line saying which tefillah it's time for now. Times are calculated on the phone and are approximate.
-- **Daily Tehillim** on the monthly cycle (or the weekly cycle), with larger and smaller text buttons. On Sunday it also offers the portion that fell on Shabbos.
-- **Tefillos**: weekday Shacharis (with Upon Arising), Mincha, Maariv and Birkat Hamazon in **Nusach Sefard**. It opens on the right tefillah for the time of day and lists what to add today, such as Yaaleh Veyavo, Al Hanisim, Mashiv haruach or Morid hatal, Bareich Aleinu or Barcheinu, no Tachanun and the Omer count.
-- **Shabbos and Yom Tov**: from candle lighting until tzeis, the Tehillim and Tefillos sections are hidden. Yom Tov follows the diaspora calendar, or the Israel one when you're in Israel.
+## Where your data is saved
+In this browser on this phone only. It doesn't sync with the claude.ai version. Clearing the browser's site data deletes it.
 
-### Text sources
-- Tehillim: *Tanach with Nikkud* (tanach.us), via Sefaria. Public domain. File: `tehillim.json`.
-- Siddur: *The Metsudah Siddur* (1981), Nusach Sefard, via Sefaria. CC-BY. File: `siddur.json`.
+## Text sources
+- Calendar, zmanim, parsha and Daf Yomi: @hebcal/core, bundled in the page.
+- Tehillim: Westminster Leningrad Codex, embedded in the page.
+- Siddur (`siddur.json`): Nusach Sefard, from Sefaria's open siddur texts.
+- Chumash with Onkelos, Rashi and Ha'amek Davar (`hd/*.json`): from Sefaria.
 
-## Where your entries are saved
-The checklist, learning log, tzedakah and weekly goal are saved **in this browser on this phone only**. They don't sync with the claude.ai version or with other devices. Clearing the browser's site data deletes them.
-
-## Putting it online (free, about 5 minutes) with GitHub Pages
-GPS only works on a secure (https) web address, so the file has to be hosted, not opened from Downloads.
-
-1. Sign in at github.com and create a new repository, for example `Luach-`.
-2. Click **Add file → Upload files**, upload `index.html`, `tehillim.json` and `siddur.json`, then click **Commit changes**.
-3. Go to **Settings → Pages**. Under "Branch", choose `main` and `/ (root)`, then click **Save**.
-4. After a minute your luach is live at `https://allinsideconstruction.github.io/Luach-/`.
-5. Open that link on the phone and allow location. Then use **Share → Add to Home Screen** (iPhone) or **⋮ → Add to Home screen** (Android) so it opens like an app.
-
-Netlify Drop (app.netlify.com/drop) also works: drag the folder onto the page.
+Zmanim are approximate; check your community's luach.

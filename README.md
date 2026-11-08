@@ -11,6 +11,9 @@ A copy of the luach that asks the phone for its GPS position, so candle lighting
 - The top of the dashboard shows the town you're in ("You're in Salford"). To get the town name, the phone sends its rough position (to about 1 km) to BigDataCloud's free lookup service, once per new place. If that service can't be reached, it shows the nearest city on the built-in list instead.
 - It does not run in the background or keep a history of where you have been.
 
+## Sections
+A bar along the bottom splits the luach into five sections: **Today** (date, day circle, today's schedule, zmanim and checklist), **Calendar** (month view and coming chagim), **Learning** (Daf Yomi, weekly stats and log), **Siddur** (Tehillim and tefillos) and **Tools** (location and tzedakah). Tap "You're in…" at the top to change your location. Under the date, a gold line gives the Hebrew date that starts at shkiah.
+
 ## Your day circle
 At the top, a 24-hour circle shows your day: midnight at the bottom and midday at the top. The gold band is daylight (netz to shkiah), with dawn and dusk shaded either side. The dotted outer arcs are the times for Shacharis, Mincha and Maariv, and each turns green once you tick it off in the daily practice checklist. The inner green ring fills as you complete the checklist. The white hand is now, and the middle shows the next zman and how long until it.
 

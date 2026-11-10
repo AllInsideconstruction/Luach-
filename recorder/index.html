@@ -310,12 +310,19 @@ function showErr(msg){const b=$("errBox");b.textContent=msg;b.hidden=!msg;}
 
 async function start(){
   showErr("");
-  if(!navigator.mediaDevices||!window.MediaRecorder){showErr("This browser can't record audio. Open the app in Safari (iPhone) or Chrome (Android), from its https web address.");return;}
+  if(!navigator.mediaDevices||!(window.MediaRecorder||window.AudioContext||window.webkitAudioContext)){showErr("This browser can't record audio. Open the app in Safari (iPhone) or Chrome (Android), from its https web address.");return;}
   try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});}
   catch(e){showErr(e&&e.name==="NotAllowedError"?"Microphone permission was refused. Allow the microphone for this site in your phone's settings and try again.":"Couldn't start the microphone: "+(e&&e.message||e));return;}
-  mime=MIMES.find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||"";
-  try{rec=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:64000}:undefined);}catch(_){rec=new MediaRecorder(stream);}
-  mime=rec.mimeType||mime||"audio/webm";
+  audioGraph();
+  if(USE_PCM&&actx){
+    // iPhone/iPad: Safari's own recorder can save silent files, so record the sound directly as WAV
+    try{await actx.resume()}catch(_){}
+    rec=pcmRecorder(actx,micSrc);mime="audio/wav";
+  }else{
+    mime=MIMES.find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||"";
+    try{rec=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:64000}:undefined);}catch(_){rec=new MediaRecorder(stream);}
+    mime=rec.mimeType||mime||"audio/webm";
+  }
   chunks=[];finalText="";interim="";marks=[];renderMarks();renderLive();
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   // notice when the phone takes the microphone away (screen locked, a phone call…)
@@ -348,7 +355,7 @@ function cleanup(){
   if(stream)stream.getTracks().forEach(t=>t.stop());
   if(actx)actx.close().catch(()=>{});
   stopRecog();awake("rec",false);
-  stream=null;rec=null;actx=null;analyser=null;startAt=0;pauseAt=0;
+  stream=null;rec=null;actx=null;analyser=null;micSrc=null;startAt=0;pauseAt=0;
   $("level").style.width="0";
   $("recBtn").classList.remove("on");$("recBtn").setAttribute("aria-label","Start recording");
   $("pauseBtn").disabled=true;$("pauseBtn").textContent="Pause";$("discardBtn").disabled=true;$("markBtn").disabled=true;$("doLive").disabled=false;
@@ -360,7 +367,7 @@ let saving=false,micLost=false,muteAt=null;
 async function stopAndSave(){
   if(saving||!rec)return;saving=true;
   if(muteAt!=null){marks.push({t:muteAt,text:"⚠ The phone switched off the microphone here"});muteAt=null;}
-  const lost=micLost;
+  const lost=micLost;const peak=rec.peak;
   const dur=elapsed();
   $("recBtn").disabled=true;setState("","Saving…");
   await finish();
@@ -376,7 +383,8 @@ async function stopAndSave(){
   $("recBtn").disabled=false;saving=false;
   await load();
   if(saved&&$("autoTx").checked)queueTx(m.id);
-  if(lost){go("record");showErr("The phone switched off the microphone (the screen locked, or a call came in), so the recording stopped. Everything up to then is saved in Meetings. To record with the screen locked, use your phone's own recorder and import it (see below).");}
+  if(peak!==undefined&&peak<0.002&&!lost){go("record");showErr("That recording came out silent: the phone didn't pass any sound to the app. Check that no other app is using the microphone, then close the app completely, open it again and try once more. If it keeps happening, record with Voice Memos and import it (see below).");}
+  else if(lost){go("record");showErr("The phone switched off the microphone (the screen locked, or a call came in), so the recording stopped. Everything up to then is saved in Meetings. To record with the screen locked, use your phone's own recorder and import it (see below).");}
   else if(saved)go("meetings");
 }
 
@@ -414,9 +422,51 @@ $("pauseBtn").onclick=pause;
 $("discardBtn").onclick=discard;
 window.addEventListener("beforeunload",e=>{if(rec||job){e.preventDefault();e.returnValue="";}});
 
+/* One audio graph for the level meter and (on Apple devices) the recording itself */
+const USE_PCM=/Apple/.test(navigator.vendor||"")||!window.MediaRecorder||/[?&]pcm=1/.test(location.search);
+let micSrc=null;
+function audioGraph(){
+  try{const AC=window.AudioContext||window.webkitAudioContext;actx=new AC();micSrc=actx.createMediaStreamSource(stream);}
+  catch(_){actx=null;micSrc=null;}
+}
+// Records 16 kHz mono 16-bit PCM and hands back a WAV file; same shape as a MediaRecorder
+function pcmRecorder(ctx,src){
+  const RATE=16000,ratio=ctx.sampleRate/RATE,parts=[];
+  const r={state:"inactive",mimeType:"audio/wav",peak:0,ondataavailable:null,onstop:null};
+  let carry=0,acc=0,n=0;
+  const proc=ctx.createScriptProcessor(4096,1,1);
+  proc.onaudioprocess=e=>{
+    if(r.state!=="recording")return;
+    const x=e.inputBuffer.getChannelData(0);
+    const out=new Int16Array(Math.ceil(x.length/ratio)+2);let k=0;
+    for(let i=0;i<x.length;i++){
+      acc+=x[i];n++;carry++;
+      if(carry>=ratio){carry-=ratio;let v=acc/n;acc=0;n=0;v=v<-1?-1:v>1?1:v;const a=v<0?-v:v;if(a>r.peak)r.peak=a;out[k++]=v<0?v*32768:v*32767;}
+    }
+    if(k)parts.push(out.slice(0,k));
+  };
+  const hush=ctx.createGain();hush.gain.value=0; // the processor must reach the speakers to run; keep it silent
+  src.connect(proc);proc.connect(hush);hush.connect(ctx.destination);
+  r.start=()=>{r.state="recording"};
+  r.pause=()=>{r.state="paused"};
+  r.resume=()=>{r.state="recording"};
+  r.requestData=()=>{};
+  r.stop=()=>{
+    if(r.state==="inactive")return;r.state="inactive";
+    try{src.disconnect(proc);proc.disconnect();hush.disconnect();}catch(_){}
+    const len=parts.reduce((t,c)=>t+c.length,0),h=new DataView(new ArrayBuffer(44));
+    const w=(o,str)=>{for(let i=0;i<str.length;i++)h.setUint8(o+i,str.charCodeAt(i))};
+    w(0,"RIFF");h.setUint32(4,36+len*2,true);w(8,"WAVE");w(12,"fmt ");h.setUint32(16,16,true);h.setUint16(20,1,true);h.setUint16(22,1,true);
+    h.setUint32(24,RATE,true);h.setUint32(28,RATE*2,true);h.setUint16(32,2,true);h.setUint16(34,16,true);w(36,"data");h.setUint32(40,len*2,true);
+    const blob=new Blob([h,...parts],{type:"audio/wav"});parts.length=0;
+    if(r.ondataavailable)r.ondataavailable({data:blob});
+    setTimeout(()=>{if(r.onstop)r.onstop()},0);
+  };
+  return r;
+}
 function meter(){
-  try{const AC=window.AudioContext||window.webkitAudioContext;actx=new AC();
-    const src=actx.createMediaStreamSource(stream);analyser=actx.createAnalyser();analyser.fftSize=512;src.connect(analyser);
+  try{if(!actx||!micSrc)audioGraph();
+    analyser=actx.createAnalyser();analyser.fftSize=512;micSrc.connect(analyser);
     const buf=new Uint8Array(analyser.fftSize);
     const loop=()=>{if(!analyser)return;analyser.getByteTimeDomainData(buf);let sum=0;for(const v of buf){const d=(v-128)/128;sum+=d*d}
       $("level").style.width=(rec&&rec.state==="recording"?Math.min(100,Math.sqrt(sum/buf.length)*350):0)+"%";raf=requestAnimationFrame(loop)};

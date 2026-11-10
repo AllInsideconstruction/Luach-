@@ -1,6 +1,6 @@
 // Meeting Recorder service worker: keeps the app working offline, and sends the headers that let
 // the transcriber use several processor cores (GitHub Pages can't send them itself).
-const VERSION = "rec-v1";
+const VERSION = "rec-v2";
 const SHELL = ["./", "./index.html", "./worker.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

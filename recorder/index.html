@@ -71,9 +71,6 @@ label.lb{display:block;margin-bottom:4px}
 .recbtn span{display:block;width:52px;height:52px;border-radius:50%;background:var(--rec);transition:all .15s}
 .recbtn.on span{width:28px;height:28px;border-radius:6px}
 .side{min-width:96px}
-.opts{display:flex;gap:8px 16px;flex-wrap:wrap;justify-content:center;font-size:14px}
-.opts label{display:inline-flex;gap:6px;align-items:center}
-.opts input{width:auto}
 .live{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;min-height:48px;max-height:200px;overflow:auto;font-size:14px;white-space:pre-wrap}
 .live .interim{color:var(--muted)}
 .marks{display:flex;flex-direction:column;gap:4px;font-size:14px}
@@ -95,7 +92,6 @@ label.lb{display:block;margin-bottom:4px}
 details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px}
 details .body{margin-top:8px;display:flex;flex-direction:column;gap:8px}
 .empty{color:var(--muted);text-align:center;padding:18px 8px}
-.search{max-width:260px}
 .storage{font-size:13px;color:var(--muted)}
 
 .tx{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
@@ -106,21 +102,40 @@ details .body{margin-top:8px;display:flex;flex-direction:column;gap:8px}
 .txt p{margin:0}
 .txt p.now{background:var(--accent-soft);border-radius:4px}
 .settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+[hidden]{display:none!important}
+main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+.band .wrap{min-height:58px}
+.pill{margin-left:auto;border:0;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;background:var(--band-ink);color:var(--band)}
+.pill.rec{background:var(--rec);color:#fff}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tools input{flex:1 1 200px}
+.checks{display:flex;flex-direction:column;gap:12px}
+.checks label{display:flex;gap:12px;align-items:flex-start}
+.checks input{width:20px;height:20px;margin-top:2px;flex:none}
+.checks small{display:block;color:var(--muted);font-size:13px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;justify-content:center;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{flex:1;max-width:200px;position:relative;background:none;border:0;padding:8px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-weight:600}
+.nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav button:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+.badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:10px;height:10px;border-radius:5px;background:var(--accent);font-style:normal}
+.badge.rec{background:var(--rec);animation:pulse 1.2s infinite}
+.badge.txt{height:auto;padding:0 5px;font-size:10px;line-height:16px;color:var(--surface);top:2px}
 </style>
 </head>
 <body>
 <header class="band">
-  <div class="wrap"><img src="icon.svg" alt=""><h1>Meeting Recorder</h1></div>
+  <div class="wrap"><img src="icon.svg" alt=""><h1>Meeting Recorder</h1><button type="button" class="pill num" id="pill" hidden></button></div>
 </header>
 
 <main class="wrap">
-  <section class="panel" aria-labelledby="newH">
+  <!-- RECORD -->
+  <section class="panel" data-tab="record" aria-labelledby="newH">
     <div class="phead"><h2 id="newH">New recording</h2><span class="hint">Saved on this phone only</span></div>
     <div>
       <label class="lb label" for="title">Meeting name</label>
       <input id="title" maxlength="120" placeholder="e.g. Site meeting – Cohen extension" autocomplete="off">
     </div>
-
     <div class="stage" id="stage">
       <div class="state"><span class="dot"></span><span id="stateTxt">Ready</span></div>
       <div class="clock num" id="clock">00:00</div>
@@ -130,21 +145,18 @@ details .body{margin-top:8px;display:flex;flex-direction:column;gap:8px}
         <button type="button" class="recbtn" id="recBtn" aria-label="Start recording"><span></span></button>
         <button type="button" class="btn ghost side" id="discardBtn" disabled>Discard</button>
       </div>
-      <div class="opts">
-        <label><input type="checkbox" id="autoTx" checked> Transcribe when I stop</label>
-        <label id="liveOpt"><input type="checkbox" id="doLive"> Live captions</label>
-        <label><input type="checkbox" id="keepAwake" checked> Keep screen on</label>
-      </div>
       <p class="hint" id="tip" style="margin:0;text-align:center">Tap the red button to start. Keep this app open while recording.</p>
+      <p class="hint" id="optSum" style="margin:0;text-align:center"></p>
     </div>
-
     <div id="errBox" class="err" hidden role="alert"></div>
-
     <div id="liveWrap" hidden>
       <div class="label" style="margin-bottom:4px">Live captions</div>
       <div class="live" id="live" aria-live="polite"></div>
     </div>
+  </section>
 
+  <section class="panel" data-tab="record" aria-labelledby="duringH">
+    <div class="phead"><h2 id="duringH">During the meeting</h2></div>
     <div>
       <div class="label" style="margin-bottom:4px">Bookmarks</div>
       <form class="markrow" id="markForm" autocomplete="off">
@@ -154,24 +166,36 @@ details .body{margin-top:8px;display:flex;flex-direction:column;gap:8px}
       </form>
       <div class="marks" id="marks"></div>
     </div>
-
     <div>
       <label class="lb label" for="notes">Notes</label>
       <textarea id="notes" placeholder="Who was there, decisions, actions…"></textarea>
     </div>
   </section>
 
-  <section class="panel" aria-labelledby="listH">
-    <div class="phead"><h2 id="listH">Saved meetings</h2>
-      <label for="q" class="sr">Search</label><input id="q" class="search" type="search" placeholder="Search meetings and transcripts">
+  <!-- MEETINGS -->
+  <section class="panel" data-tab="meetings" aria-labelledby="listH" hidden>
+    <div class="phead"><h2 id="listH">Meetings</h2><span class="hint num" id="count"></span></div>
+    <div class="tools">
+      <label for="q" class="sr">Search</label><input id="q" type="search" placeholder="Search meetings and transcripts">
+      <button type="button" class="btn" id="allNotes" hidden>Save all to Notes</button>
     </div>
-    <div class="acts"><button type="button" class="btn" id="allNotes" hidden>Save all to Notes</button><span class="hint" id="notesMsg" role="status"></span></div>
+    <span class="hint" id="notesMsg" role="status"></span>
     <div class="list" id="list"><div class="empty">Loading…</div></div>
     <div class="storage" id="storage"></div>
   </section>
 
-  <section class="panel" aria-labelledby="setH">
-    <div class="phead"><h2 id="setH">Transcript settings</h2></div>
+  <!-- SETTINGS -->
+  <section class="panel" data-tab="settings" aria-labelledby="recSetH" hidden>
+    <div class="phead"><h2 id="recSetH">Recording</h2></div>
+    <div class="checks">
+      <label><input type="checkbox" id="autoTx" checked><span><b>Transcribe when I stop</b><small>Writes out the whole meeting as soon as you finish.</small></span></label>
+      <label><input type="checkbox" id="keepAwake" checked><span><b>Keep screen on</b><small>Most phones stop recording when the screen locks.</small></span></label>
+      <label id="liveOpt"><input type="checkbox" id="doLive"><span><b>Live captions</b><small>Rough words on screen while recording. The full transcript is better.</small></span></label>
+    </div>
+  </section>
+
+  <section class="panel" data-tab="settings" aria-labelledby="setH" hidden>
+    <div class="phead"><h2 id="setH">Transcripts</h2></div>
     <div class="settings">
       <div><label class="lb label" for="model">Quality</label>
         <select id="model">
@@ -189,7 +213,19 @@ details .body{margin-top:8px;display:flex;flex-direction:column;gap:8px}
     </div>
     <p class="hint" style="margin:0">Transcripts are made on this phone. Nothing is uploaded. The first time, the phone downloads the speech model once (use Wi‑Fi). After that it works offline. A transcript takes roughly as long as the meeting, or less on newer phones. Keep the app open until it finishes. If it's interrupted, tap <b>Continue</b> and it carries on from where it stopped.</p>
   </section>
+
+  <section class="panel" data-tab="settings" aria-labelledby="instH" hidden>
+    <div class="phead"><h2 id="instH">Put it on your home screen</h2></div>
+    <p class="hint" style="margin:0"><b>iPhone (Safari):</b> tap Share, then <b>Add to Home Screen</b>.<br><b>Android (Chrome):</b> tap ⋮, then <b>Install app</b> or <b>Add to Home screen</b>.<br>It opens like a normal app and works without internet.</p>
+    <p class="hint" style="margin:0">Recordings are kept in this app on this phone only. Use <b>Save to Notes</b> or <b>Download</b> to keep a copy elsewhere. Remember to tell people you are recording.</p>
+  </section>
 </main>
+
+<nav class="nav" aria-label="Sections">
+  <button type="button" data-go="record"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Record</span><i class="badge rec" id="navRec" hidden></i></button>
+  <button type="button" data-go="meetings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Meetings</span><i class="badge" id="navMeet" hidden></i></button>
+  <button type="button" data-go="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
+</nav>
 
 <script>
 (()=>{
@@ -200,7 +236,33 @@ const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(
 
 /* settings */
 for(const id of ["model","lang"]){const el=$(id);el.value=ls.get("rec."+id,el.value);el.onchange=()=>ls.set("rec."+id,el.value);}
-for(const id of ["autoTx","doLive","keepAwake"]){const el=$(id);el.checked=ls.get("rec."+id,String(el.checked))==="true";el.onchange=()=>ls.set("rec."+id,el.checked);}
+for(const id of ["autoTx","doLive","keepAwake"]){const el=$(id);el.checked=ls.get("rec."+id,String(el.checked))==="true";el.onchange=()=>{ls.set("rec."+id,el.checked);optSum();};}
+function optSum(){
+  const on=[$("autoTx").checked?"Transcript when you stop":"No automatic transcript",$("keepAwake").checked?"screen stays on":"screen may sleep"];
+  if($("doLive").checked&&!$("liveOpt").hidden)on.push("live captions");
+  $("optSum").innerHTML=esc(on.join(" · "))+' · <a href="#settings">change</a>';
+}
+
+/* sections and bottom bar */
+const TABS=["record","meetings","settings"];
+function go(t){
+  if(!TABS.includes(t))t="record";
+  document.querySelectorAll("[data-tab]").forEach(el=>el.hidden=el.dataset.tab!==t);
+  document.querySelectorAll("[data-go]").forEach(b=>b.dataset.go===t?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  if(location.hash!=="#"+t)history.replaceState(null,"","#"+t);
+  window.scrollTo(0,0);
+}
+document.querySelector(".nav").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b)go(b.dataset.go)});
+window.addEventListener("hashchange",()=>go(location.hash.slice(1)));
+$("pill").onclick=()=>go(rec?"record":"meetings");
+function status(){
+  const p=$("pill");
+  if(rec){p.hidden=false;p.className="pill num rec";p.textContent=(rec.state==="paused"?"Ⅱ ":"● ")+fmt(elapsed());}
+  else if(job){p.hidden=false;p.className="pill num";p.textContent=job.t0?"Transcribing "+Math.round((job.pct||0)*100)+"%":"Getting ready…";}
+  else p.hidden=true;
+  $("navRec").hidden=!rec;
+  const nm=$("navMeet");nm.hidden=!job;if(job){nm.className="badge txt num";nm.textContent=job.t0?Math.round((job.pct||0)*100)+"%":"…";}
+}
 
 /* ---------- IndexedDB ---------- */
 let dbp=null;
@@ -223,6 +285,7 @@ let actx=null,analyser=null,raf=null,wake=null,recog=null,recogWanted=false;
 let finalText="",interim="",marks=[],startedIso="";
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(!SR){$("doLive").checked=false;$("liveOpt").hidden=true;}
+optSum();go(location.hash.slice(1));
 
 const elapsed=()=>!startAt?0:(pauseAt||Date.now())-startAt-pausedTotal;
 function setState(kind,txt){$("stage").className="stage "+kind;$("stateTxt").textContent=txt;}
@@ -240,14 +303,14 @@ async function start(){
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   rec.start(1000);
   startAt=Date.now();pausedTotal=0;pauseAt=0;startedIso=new Date().toISOString();
-  tick=setInterval(()=>{$("clock").textContent=fmt(elapsed())},250);
+  tick=setInterval(()=>{$("clock").textContent=fmt(elapsed());status();},250);
   meter();
   if($("keepAwake").checked)awake("rec",true);
   if(SR&&$("doLive").checked){$("liveWrap").hidden=false;startRecog();}
   $("recBtn").classList.add("on");$("recBtn").setAttribute("aria-label","Stop and save");
   $("pauseBtn").disabled=false;$("discardBtn").disabled=false;$("markBtn").disabled=false;$("doLive").disabled=true;
   $("tip").textContent="Recording. Tap the square to stop and save.";
-  setState("rec","Recording");
+  setState("rec","Recording");status();
 }
 function pause(){
   if(!rec)return;
@@ -264,7 +327,7 @@ function cleanup(){
   $("level").style.width="0";
   $("recBtn").classList.remove("on");$("recBtn").setAttribute("aria-label","Start recording");
   $("pauseBtn").disabled=true;$("pauseBtn").textContent="Pause";$("discardBtn").disabled=true;$("markBtn").disabled=true;$("doLive").disabled=false;
-  $("clock").textContent="00:00";$("liveWrap").hidden=true;
+  $("clock").textContent="00:00";$("liveWrap").hidden=true;status();
   $("tip").textContent="Tap the red button to start. Keep this app open while recording.";
   setState("","Ready");
 }
@@ -283,7 +346,7 @@ async function stopAndSave(){
   catch(e){saved=false;showErr("Couldn't save to the phone's storage, so the recording is being downloaded instead.");download(blob,fileName(m,ext(mime)));}
   $("recBtn").disabled=false;
   await load();
-  if(saved&&$("autoTx").checked)queueTx(m.id);
+  if(saved){go("meetings");if($("autoTx").checked)queueTx(m.id);}
 }
 async function discard(){
   if(!confirm("Discard this recording? It won't be saved."))return;
@@ -392,7 +455,7 @@ function txHtml(m){
   if(t&&t.segs&&t.segs.length)body+=`<div class="txt" id="txt-${m.id}">${t.segs.map(s=>`<p data-s="${s.s}"><button type="button" class="ts num" data-seek="${m.id}" data-t="${Math.round(s.s*1000)}">${fmt(s.s*1000)}</button>${esc(s.t)}</p>`).join("")}</div>`;
   return `<div class="txhead">${head}</div>${body}`;
 }
-function updateTx(id){const m=all.find(x=>x.id===id);const el=$("tx-"+id);if(!m||!el)return;
+function updateTx(id){status();const m=all.find(x=>x.id===id);const el=$("tx-"+id);if(!m||!el)return;
   const box=$("txt-"+id),atEnd=!box||box.scrollTop+box.clientHeight>=box.scrollHeight-8;
   el.innerHTML=txHtml(m);
   const nb=$("txt-"+id);if(nb&&job&&job.id===id&&atEnd)nb.scrollTop=nb.scrollHeight;}
@@ -420,7 +483,7 @@ function render(){
   const q=$("q").value.trim().toLowerCase();
   const hay=m=>(m.title+" "+m.notes+" "+(m.live||"")+" "+(m.marks||[]).map(k=>k.text).join(" ")+" "+(m.tx&&m.tx.segs?m.tx.segs.map(s=>s.t).join(" "):"")).toLowerCase();
   const rows=q?all.filter(m=>hay(m).includes(q)):all;
-  $("allNotes").hidden=!rows.length;$("allNotes").textContent=q?"Save these to Notes":"Save all to Notes";
+  $("count").textContent=all.length?all.length+" saved":"";$("allNotes").hidden=!rows.length;$("allNotes").textContent=q?"Save these to Notes":"Save all to Notes";
   for(const [id,u] of urls){if(!all.some(m=>m.id===id)){URL.revokeObjectURL(u);urls.delete(id);}}
   if(!rows.length){$("list").innerHTML=`<div class="empty">${all.length?"No meetings match that search.":"No meetings recorded yet. Your recordings will be listed here."}</div>`;return;}
   $("list").innerHTML=rows.map(m=>{

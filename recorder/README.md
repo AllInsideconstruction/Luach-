@@ -25,6 +25,13 @@ While recording, a red timer shows at the top whichever section you're in. While
 - **Keep screen on** stops the phone from sleeping, because most phones stop recording when the screen locks. Keep the app open while recording.
 - **Live captions** (optional) show rough words while you record, where the phone supports it.
 
+## Recording with the screen locked
+Phones switch off the microphone for web apps when the screen locks. On iPhone this always happens, and on Android it often does. So:
+- For a meeting where the phone will be locked or in your pocket, record it with the phone's own recorder (**Voice Memos** on iPhone, **Recorder** on Android), which keeps recording when locked.
+- Then on the **Record** screen tap **Import a recording** and pick the file. It is saved in Meetings and transcribed like any other recording. Several files can be imported at once.
+- iPhone: in Voice Memos, tap the recording, then **⋯ → Save to Files**, then pick it from Files when importing.
+- If the phone switches the microphone off while this app is recording (the screen locked, or a call came in), the app saves everything recorded up to then and says so. A short pause is marked with a ⚠ bookmark.
+
 ## Transcript after recording
 - With **Transcribe when I stop** ticked, a full transcript with timestamps is made as soon as you stop. You can also tap **Transcribe** on any saved meeting.
 - It runs on the phone with the Whisper speech model. Nothing is uploaded. The first time, the phone downloads the model once (about 80 MB on Standard, so use Wi-Fi). After that it works offline.

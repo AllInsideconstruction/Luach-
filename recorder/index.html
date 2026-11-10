@@ -172,6 +172,23 @@ main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
     </div>
   </section>
 
+  <section class="panel" data-tab="record" aria-labelledby="impH">
+    <div class="phead"><h2 id="impH">Recording with the screen locked</h2></div>
+    <p class="hint" style="margin:0">Phones switch off the microphone for web apps when the screen locks. To record with the screen locked, use your phone's own recorder (<b>Voice Memos</b> on iPhone, <b>Recorder</b> on Android). Afterwards, import the recording here to get the transcript.</p>
+    <div class="tools"><button type="button" class="btn" id="importBtn">Import a recording</button><span class="hint" id="impMsg" role="status"></span></div>
+    <input type="file" id="importFile" accept="audio/*,.m4a,.mp3,.wav,.aac,.ogg,.opus,.webm,.amr,.3gp" multiple hidden>
+    <details><summary>iPhone: from Voice Memos</summary><div class="body hint">
+      <span>1. Record the meeting in <b>Voice Memos</b>. You can lock the screen.</span>
+      <span>2. Afterwards, tap the recording, then <b>⋯</b> → <b>Save to Files</b> and save it, for example in "On My iPhone".</span>
+      <span>3. Come back here, tap <b>Import a recording</b>, then <b>Browse</b> and pick it.</span>
+    </div></details>
+    <details><summary>Android: from the Recorder app</summary><div class="body hint">
+      <span>1. Record the meeting in your phone's <b>Recorder</b> (or Voice Recorder) app. You can lock the screen.</span>
+      <span>2. Come back here, tap <b>Import a recording</b> and choose it (usually under Recordings or Music, or in the recorder's own folder).</span>
+      <span>If you can't find it, open the recording in the Recorder app and use <b>Share</b> → <b>Save to device</b> first.</span>
+    </div></details>
+  </section>
+
   <!-- MEETINGS -->
   <section class="panel" data-tab="meetings" aria-labelledby="listH" hidden>
     <div class="phead"><h2 id="listH">Meetings</h2><span class="hint num" id="count"></span></div>
@@ -301,6 +318,14 @@ async function start(){
   mime=rec.mimeType||mime||"audio/webm";
   chunks=[];finalText="";interim="";marks=[];renderMarks();renderLive();
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  // notice when the phone takes the microphone away (screen locked, a phone call…)
+  micLost=false;muteAt=null;
+  const track=stream.getAudioTracks()[0];
+  if(track){
+    track.onended=()=>{if(rec&&!saving){micLost=true;stopAndSave();}};
+    track.onmute=()=>{if(rec&&muteAt==null)muteAt=elapsed();};
+    track.onunmute=()=>{if(rec&&muteAt!=null){const a=muteAt;muteAt=null;if(elapsed()-a>1500){marks.push({t:a,text:`⚠ The phone paused the microphone here for ${fmt(elapsed()-a)}`});renderMarks();}}};
+  }
   rec.start(1000);
   startAt=Date.now();pausedTotal=0;pauseAt=0;startedIso=new Date().toISOString();
   tick=setInterval(()=>{$("clock").textContent=fmt(elapsed());status();},250);
@@ -331,23 +356,55 @@ function cleanup(){
   $("tip").textContent="Tap the red button to start. Keep this app open while recording.";
   setState("","Ready");
 }
+let saving=false,micLost=false,muteAt=null;
 async function stopAndSave(){
+  if(saving||!rec)return;saving=true;
+  if(muteAt!=null){marks.push({t:muteAt,text:"⚠ The phone switched off the microphone here"});muteAt=null;}
+  const lost=micLost;
   const dur=elapsed();
   $("recBtn").disabled=true;setState("","Saving…");
   await finish();
   const blob=new Blob(chunks,{type:mime});
   const t=$("title").value.trim(),when=new Date(startedIso);
-  const m={id:"m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+  const m={id:newId(),
     title:t||("Meeting "+when.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" "+when.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})),
     started:startedIso,duration:dur,mime,blob,live:(finalText+" "+interim).trim(),notes:$("notes").value.trim(),marks:marks.slice(),tx:null};
   cleanup();
   let saved=true;
   try{await dbPut(m);$("title").value="";$("notes").value="";finalText="";interim="";marks=[];renderMarks();renderLive();}
   catch(e){saved=false;showErr("Couldn't save to the phone's storage, so the recording is being downloaded instead.");download(blob,fileName(m,ext(mime)));}
-  $("recBtn").disabled=false;
+  $("recBtn").disabled=false;saving=false;
   await load();
-  if(saved){go("meetings");if($("autoTx").checked)queueTx(m.id);}
+  if(saved&&$("autoTx").checked)queueTx(m.id);
+  if(lost){go("record");showErr("The phone switched off the microphone (the screen locked, or a call came in), so the recording stopped. Everything up to then is saved in Meetings. To record with the screen locked, use your phone's own recorder and import it (see below).");}
+  else if(saved)go("meetings");
 }
+
+/* import a recording made with another app (Voice Memos, Recorder…) */
+const newId=()=>"m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function guessType(n){const x=(n.split(".").pop()||"").toLowerCase();return ({m4a:"audio/mp4",mp4:"audio/mp4",aac:"audio/aac",mp3:"audio/mpeg",wav:"audio/wav",ogg:"audio/ogg",opus:"audio/ogg",webm:"audio/webm",amr:"audio/amr","3gp":"audio/3gpp"})[x]||"audio/mp4";}
+function audioDuration(f){return new Promise(res=>{const a=document.createElement("audio"),u=URL.createObjectURL(f);let done=false;
+  const end=v=>{if(done)return;done=true;URL.revokeObjectURL(u);res(v)};
+  a.preload="metadata";a.onloadedmetadata=()=>end(isFinite(a.duration)?Math.round(a.duration*1000):0);a.onerror=()=>end(0);setTimeout(()=>end(0),8000);a.src=u;});}
+$("importBtn").onclick=()=>$("importFile").click();
+$("importFile").onchange=async e=>{
+  const files=[...e.target.files];e.target.value="";if(!files.length)return;
+  const msg=$("impMsg");msg.textContent="Importing…";
+  const ids=[];
+  for(const f of files){
+    const type=(f.type&&f.type.startsWith("audio/")?f.type:guessType(f.name));
+    const dur=await audioDuration(f);
+    const end=f.lastModified||Date.now();
+    const m={id:newId(),title:f.name.replace(/\.[^.]+$/,"").trim()||"Imported recording",started:new Date(end-dur).toISOString(),duration:dur,mime:type,
+      blob:new Blob([f],{type}),live:"",notes:"",marks:[],tx:null,imported:true};
+    try{await dbPut(m);ids.push(m.id);}catch(_){msg.textContent=`Couldn't save ${f.name}. The phone may be out of space.`;}
+  }
+  if(!ids.length)return;
+  msg.textContent="";
+  await load();go("meetings");
+  if($("autoTx").checked)ids.forEach(queueTx);
+  else msg.textContent="";
+};
 async function discard(){
   if(!confirm("Discard this recording? It won't be saved."))return;
   await finish();chunks=[];cleanup();finalText="";interim="";marks=[];renderMarks();renderLive();
@@ -420,6 +477,7 @@ async function runQueue(){
   try{audio=await decode16k(m.blob);}
   catch(e){m.tx.status="error";m.tx.error="This phone couldn't read the recording to transcribe it.";await dbPut(m).catch(()=>{});endJob(id);return;}
   m.tx.total=audio.length/16000;
+  if(!m.duration){m.duration=Math.round(m.tx.total*1000);dbPut(m).catch(()=>{});}
   if(!worker){worker=new Worker("worker.js",{type:"module"});}
   worker.onmessage=async e=>{
     const d=e.data;if(!job||job.id!==id)return;
@@ -462,7 +520,7 @@ function updateTx(id){status();const m=all.find(x=>x.id===id);const el=$("tx-"+i
 
 /* ---------- saved list ---------- */
 let all=[];const urls=new Map();
-const ext=m=>/mp4|aac|m4a/.test(m)?"m4a":/ogg/.test(m)?"ogg":"webm";
+const ext=m=>/mp4|m4a/.test(m)?"m4a":/aac/.test(m)?"aac":/mpeg|mp3/.test(m)?"mp3":/wav/.test(m)?"wav":/ogg/.test(m)?"ogg":/amr/.test(m)?"amr":/3gpp/.test(m)?"3gp":"webm";
 const fileName=(m,x)=>(m.title.replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-")||"meeting")+"-"+m.started.slice(0,10)+"."+x;
 function download(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);}
 function textOf(m){
@@ -491,7 +549,7 @@ function render(){
     const d=new Date(m.started);
     const mk=(m.marks||[]).map(k=>`<div><button type="button" class="ts num" data-seek="${m.id}" data-t="${k.t}">${fmt(k.t)}</button><span>${esc(k.text)}</span></div>`).join("");
     return `<article class="item" data-id="${m.id}">
-      <div class="top"><h3>${esc(m.title)}</h3><span class="hint num">${esc(d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"}))} · ${esc(d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} · ${fmt(m.duration)} · ${(m.blob.size/1048576).toFixed(1)} MB</span></div>
+      <div class="top"><h3>${esc(m.title)}${m.imported?' <span class="hint">· imported</span>':""}</h3><span class="hint num">${esc(d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"}))} · ${esc(d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} · ${fmt(m.duration)} · ${(m.blob.size/1048576).toFixed(1)} MB</span></div>
       <audio controls preload="metadata" src="${urls.get(m.id)}" id="a-${m.id}" data-id="${m.id}"></audio>
       ${mk?`<div class="marks">${mk}</div>`:""}
       <div class="tx" id="tx-${m.id}">${txHtml(m)}</div>

@@ -1,0 +1,20 @@
+{
+  "name": "Reminders · Yehuda's Luach",
+  "short_name": "Reminders",
+  "id": "reminders.html",
+  "start_url": "reminders.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f4f8",
+  "theme_color": "#22479a",
+  "description": "Reminders with lists, repeats, Hebrew-date yahrzeits and alerts.",
+  "icons": [
+    {"src": "rem-icon.svg", "sizes": "any", "type": "image/svg+xml"},
+    {"src": "rem-icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "rem-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ],
+  "shortcuts": [
+    {"name": "New reminder", "url": "reminders.html?new"},
+    {"name": "Today", "url": "reminders.html?view=today"}
+  ]
+}

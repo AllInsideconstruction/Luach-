@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#142a61">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Recorder">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Meeting Recorder</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --ink:#18213a; --muted:#5b6582; --line:#dde2ec;
+  --accent:#1f3f8f; --accent-soft:#e4eaf8; --band:#142a61; --band-ink:#f2f5fc; --band-muted:#b7c3e4;
+  --gold:#b0861e; --good:#2f7a4f; --good-soft:#e2f2e8; --rec:#c0392b; --rec-soft:#fbe7e4;
+  --f-display:Georgia,"Times New Roman",serif;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1322; --surface:#161d31; --ink:#e6eaf5; --muted:#99a3bf; --line:#283150;
+  --accent:#8eaaf2; --accent-soft:#1e2a4c; --band:#0a1838; --band-ink:#eef2fc; --band-muted:#a2b0d6;
+  --gold:#e0b850; --good:#6fcf97; --good-soft:#163024; --rec:#ff7a6b; --rec-soft:#3a1c1a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1322; --surface:#161d31; --ink:#e6eaf5; --muted:#99a3bf; --line:#283150;
+  --accent:#8eaaf2; --accent-soft:#1e2a4c; --band:#0a1838; --band-ink:#eef2fc; --band-muted:#a2b0d6;
+  --gold:#e0b850; --good:#6fcf97; --good-soft:#163024; --rec:#ff7a6b; --rec-soft:#3a1c1a; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-bottom:env(safe-area-inset-bottom,0px)}
+.wrap{max-width:820px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2{font-family:var(--f-display);margin:0;font-weight:700;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+.label{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.hint{color:var(--muted);font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+button{font:inherit;cursor:pointer}
+.band{background:var(--band);color:var(--band-ink);padding-top:env(safe-area-inset-top,0px)}
+.band .wrap{padding-block:16px;display:flex;align-items:center;gap:12px}
+.band img{width:34px;height:34px;border-radius:8px}
+.band h1{font-size:23px}
+main{display:flex;flex-direction:column;gap:16px;padding-block:18px 40px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.phead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.phead h2{font-size:21px}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:90px}
+label.lb{display:block;margin-bottom:4px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{background:transparent;border-color:var(--rec);color:var(--rec)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,.recbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.stage{display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
+.clock{font-size:44px;font-weight:600;letter-spacing:.02em}
+.state{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.rec .dot{background:var(--rec);animation:pulse 1.2s infinite}
+.paused .dot{background:var(--gold)}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.rec .dot{animation:none}}
+.meter{width:100%;max-width:360px;height:8px;border-radius:4px;background:var(--accent-soft);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--good);transition:width .08s linear}
+.controls{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.recbtn{width:76px;height:76px;border-radius:50%;border:4px solid var(--rec);background:var(--surface);display:grid;place-items:center;padding:0}
+.recbtn span{display:block;width:52px;height:52px;border-radius:50%;background:var(--rec);transition:all .15s}
+.recbtn.on span{width:28px;height:28px;border-radius:6px}
+.side{min-width:96px}
+.live{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;min-height:48px;max-height:200px;overflow:auto;font-size:14px;white-space:pre-wrap}
+.live .interim{color:var(--muted)}
+.marks{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.marks div{display:flex;gap:8px;align-items:baseline}
+.marks b{color:var(--gold);min-width:52px}
+.markrow{display:flex;gap:8px}
+.markrow input{flex:1}
+.err{background:var(--rec-soft);color:var(--rec);border-radius:8px;padding:10px 12px;font-size:14px}
+.note{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:14px}
+
+.list{display:flex;flex-direction:column;gap:10px}
+.item{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--bg);min-width:0}
+.item .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.item h3{margin:0;font-size:17px;font-weight:700;overflow-wrap:anywhere}
+.item audio{width:100%}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.acts .btn,.tbtn{padding:6px 11px;font-size:14px}
+.ts{border:0;background:none;color:var(--gold);font-weight:700;padding:0 6px 0 0;font-size:13px}
+details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px}
+details .body{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+.empty{color:var(--muted);text-align:center;padding:18px 8px}
+.storage{font-size:13px;color:var(--muted)}
+
+.tx{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.txhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.bar{height:6px;border-radius:3px;background:var(--accent-soft);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.txt{max-height:340px;overflow:auto;font-size:14.5px;display:flex;flex-direction:column;gap:6px;padding-right:4px}
+.txt p{margin:0}
+.txt p.now{background:var(--accent-soft);border-radius:4px}
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+[hidden]{display:none!important}
+main{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+.band .wrap{min-height:58px}
+.pill{margin-left:auto;border:0;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;background:var(--band-ink);color:var(--band)}
+.pill.rec{background:var(--rec);color:#fff}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.tools input{flex:1 1 200px}
+.checks{display:flex;flex-direction:column;gap:12px}
+.checks label{display:flex;gap:12px;align-items:flex-start}
+.checks input{width:20px;height:20px;margin-top:2px;flex:none}
+.checks small{display:block;color:var(--muted);font-size:13px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;justify-content:center;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{flex:1;max-width:200px;position:relative;background:none;border:0;padding:8px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:12px;font-weight:600}
+.nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav button:focus-visible{outline:3px solid var(--gold);outline-offset:-3px}
+.badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:10px;height:10px;border-radius:5px;background:var(--accent);font-style:normal}
+.badge.rec{background:var(--rec);animation:pulse 1.2s infinite}
+.badge.txt{height:auto;padding:0 5px;font-size:10px;line-height:16px;color:var(--surface);top:2px}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap"><img src="icon.svg" alt=""><h1>Meeting Recorder</h1><button type="button" class="pill num" id="pill" hidden></button></div>
+</header>
+
+<main class="wrap">
+  <!-- RECORD -->
+  <section class="panel" data-tab="record" aria-labelledby="newH">
+    <div class="phead"><h2 id="newH">New recording</h2><span class="hint">Saved on this phone only</span></div>
+    <div>
+      <label class="lb label" for="title">Meeting name</label>
+      <input id="title" maxlength="120" placeholder="e.g. Site meeting – Cohen extension" autocomplete="off">
+    </div>
+    <div class="stage" id="stage">
+      <div class="state"><span class="dot"></span><span id="stateTxt">Ready</span></div>
+      <div class="clock num" id="clock">00:00</div>
+      <div class="meter" aria-hidden="true"><i id="level"></i></div>
+      <div class="controls">
+        <button type="button" class="btn ghost side" id="pauseBtn" disabled>Pause</button>
+        <button type="button" class="recbtn" id="recBtn" aria-label="Start recording"><span></span></button>
+        <button type="button" class="btn ghost side" id="discardBtn" disabled>Discard</button>
+      </div>
+      <p class="hint" id="tip" style="margin:0;text-align:center">Tap the red button to start. Keep this app open while recording.</p>
+      <p class="hint" id="optSum" style="margin:0;text-align:center"></p>
+    </div>
+    <div id="errBox" class="err" hidden role="alert"></div>
+    <div id="liveWrap" hidden>
+      <div class="label" style="margin-bottom:4px">Live captions</div>
+      <div class="live" id="live" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="panel" data-tab="record" aria-labelledby="duringH">
+    <div class="phead"><h2 id="duringH">During the meeting</h2></div>
+    <div>
+      <div class="label" style="margin-bottom:4px">Bookmarks</div>
+      <form class="markrow" id="markForm" autocomplete="off">
+        <label for="markTxt" class="sr">Bookmark note</label>
+        <input id="markTxt" placeholder="Note a key moment (e.g. price agreed)" maxlength="200">
+        <button class="btn ghost" type="submit" id="markBtn" disabled>Mark</button>
+      </form>
+      <div class="marks" id="marks"></div>
+    </div>
+    <div>
+      <label class="lb label" for="notes">Notes</label>
+      <textarea id="notes" placeholder="Who was there, decisions, actions…"></textarea>
+    </div>
+  </section>
+
+  <!-- MEETINGS -->
+  <section class="panel" data-tab="meetings" aria-labelledby="listH" hidden>
+    <div class="phead"><h2 id="listH">Meetings</h2><span class="hint num" id="count"></span></div>
+    <div class="tools">
+      <label for="q" class="sr">Search</label><input id="q" type="search" placeholder="Search meetings and transcripts">
+      <button type="button" class="btn" id="allNotes" hidden>Save all to Notes</button>
+    </div>
+    <span class="hint" id="notesMsg" role="status"></span>
+    <div class="list" id="list"><div class="empty">Loading…</div></div>
+    <div class="storage" id="storage"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="panel" data-tab="settings" aria-labelledby="recSetH" hidden>
+    <div class="phead"><h2 id="recSetH">Recording</h2></div>
+    <div class="checks">
+      <label><input type="checkbox" id="autoTx" checked><span><b>Transcribe when I stop</b><small>Writes out the whole meeting as soon as you finish.</small></span></label>
+      <label><input type="checkbox" id="keepAwake" checked><span><b>Keep screen on</b><small>Most phones stop recording when the screen locks.</small></span></label>
+      <label id="liveOpt"><input type="checkbox" id="doLive"><span><b>Live captions</b><small>Rough words on screen while recording. The full transcript is better.</small></span></label>
+    </div>
+  </section>
+
+  <section class="panel" data-tab="settings" aria-labelledby="setH" hidden>
+    <div class="phead"><h2 id="setH">Transcripts</h2></div>
+    <div class="settings">
+      <div><label class="lb label" for="model">Quality</label>
+        <select id="model">
+          <option value="tiny">Quick – 40 MB download, rougher</option>
+          <option value="base" selected>Standard – 80 MB download</option>
+          <option value="small">Best – 250 MB download, slow</option>
+        </select></div>
+      <div><label class="lb label" for="lang">Language spoken</label>
+        <select id="lang">
+          <option value="english" selected>English</option>
+          <option value="auto">Detect automatically</option>
+          <option value="hebrew">Hebrew</option>
+          <option value="yiddish">Yiddish</option>
+        </select></div>
+    </div>
+    <p class="hint" style="margin:0">Transcripts are made on this phone. Nothing is uploaded. The first time, the phone downloads the speech model once (use Wi‑Fi). After that it works offline. A transcript takes roughly as long as the meeting, or less on newer phones. Keep the app open until it finishes. If it's interrupted, tap <b>Continue</b> and it carries on from where it stopped.</p>
+  </section>
+
+  <section class="panel" data-tab="settings" aria-labelledby="instH" hidden>
+    <div class="phead"><h2 id="instH">Put it on your home screen</h2></div>
+    <p class="hint" style="margin:0"><b>iPhone (Safari):</b> tap Share, then <b>Add to Home Screen</b>.<br><b>Android (Chrome):</b> tap ⋮, then <b>Install app</b> or <b>Add to Home screen</b>.<br>It opens like a normal app and works without internet.</p>
+    <p class="hint" style="margin:0">Recordings are kept in this app on this phone only. Use <b>Save to Notes</b> or <b>Download</b> to keep a copy elsewhere. Remember to tell people you are recording.</p>
+  </section>
+</main>
+
+<nav class="nav" aria-label="Sections">
+  <button type="button" data-go="record"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Record</span><i class="badge rec" id="navRec" hidden></i></button>
+  <button type="button" data-go="meetings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span>Meetings</span><i class="badge" id="navMeet" hidden></i></button>
+  <button type="button" data-go="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Settings</span></button>
+</nav>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=ms=>{const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;const p=n=>String(n).padStart(2,"0");return (h?h+":"+p(m):p(m))+":"+p(x)};
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(_){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(_){}}};
+
+/* settings */
+for(const id of ["model","lang"]){const el=$(id);el.value=ls.get("rec."+id,el.value);el.onchange=()=>ls.set("rec."+id,el.value);}
+for(const id of ["autoTx","doLive","keepAwake"]){const el=$(id);el.checked=ls.get("rec."+id,String(el.checked))==="true";el.onchange=()=>{ls.set("rec."+id,el.checked);optSum();};}
+function optSum(){
+  const on=[$("autoTx").checked?"Transcript when you stop":"No automatic transcript",$("keepAwake").checked?"screen stays on":"screen may sleep"];
+  if($("doLive").checked&&!$("liveOpt").hidden)on.push("live captions");
+  $("optSum").innerHTML=esc(on.join(" · "))+' · <a href="#settings">change</a>';
+}
+
+/* sections and bottom bar */
+const TABS=["record","meetings","settings"];
+function go(t){
+  if(!TABS.includes(t))t="record";
+  document.querySelectorAll("[data-tab]").forEach(el=>el.hidden=el.dataset.tab!==t);
+  document.querySelectorAll("[data-go]").forEach(b=>b.dataset.go===t?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  if(location.hash!=="#"+t)history.replaceState(null,"","#"+t);
+  window.scrollTo(0,0);
+}
+document.querySelector(".nav").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b)go(b.dataset.go)});
+window.addEventListener("hashchange",()=>go(location.hash.slice(1)));
+$("pill").onclick=()=>go(rec?"record":"meetings");
+function status(){
+  const p=$("pill");
+  if(rec){p.hidden=false;p.className="pill num rec";p.textContent=(rec.state==="paused"?"Ⅱ ":"● ")+fmt(elapsed());}
+  else if(job){p.hidden=false;p.className="pill num";p.textContent=job.t0?"Transcribing "+Math.round((job.pct||0)*100)+"%":"Getting ready…";}
+  else p.hidden=true;
+  $("navRec").hidden=!rec;
+  const nm=$("navMeet");nm.hidden=!job;if(job){nm.className="badge txt num";nm.textContent=job.t0?Math.round((job.pct||0)*100)+"%":"…";}
+}
+
+/* ---------- IndexedDB ---------- */
+let dbp=null;
+function idb(){
+  if(dbp)return dbp;
+  dbp=new Promise((res,rej)=>{const r=indexedDB.open("meeting-recorder",1);
+    r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("meetings"))d.createObjectStore("meetings",{keyPath:"id"});};
+    r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+  return dbp;
+}
+async function tx(mode,fn){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction("meetings",mode);const s=t.objectStore("meetings");let out;const r=fn(s);if(r)r.onsuccess=()=>{out=r.result};t.oncomplete=()=>res(out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);});}
+const dbAll=()=>tx("readonly",s=>s.getAll());
+const dbPut=m=>tx("readwrite",s=>s.put(m));
+const dbDel=id=>tx("readwrite",s=>s.delete(id));
+
+/* ---------- recording ---------- */
+const MIMES=["audio/webm;codecs=opus","audio/mp4;codecs=mp4a.40.2","audio/mp4","audio/webm","audio/ogg;codecs=opus"];
+let stream=null,rec=null,chunks=[],mime="",startAt=0,pausedTotal=0,pauseAt=0,tick=null;
+let actx=null,analyser=null,raf=null,wake=null,recog=null,recogWanted=false;
+let finalText="",interim="",marks=[],startedIso="";
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){$("doLive").checked=false;$("liveOpt").hidden=true;}
+optSum();go(location.hash.slice(1));
+
+const elapsed=()=>!startAt?0:(pauseAt||Date.now())-startAt-pausedTotal;
+function setState(kind,txt){$("stage").className="stage "+kind;$("stateTxt").textContent=txt;}
+function showErr(msg){const b=$("errBox");b.textContent=msg;b.hidden=!msg;}
+
+async function start(){
+  showErr("");
+  if(!navigator.mediaDevices||!window.MediaRecorder){showErr("This browser can't record audio. Open the app in Safari (iPhone) or Chrome (Android), from its https web address.");return;}
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});}
+  catch(e){showErr(e&&e.name==="NotAllowedError"?"Microphone permission was refused. Allow the microphone for this site in your phone's settings and try again.":"Couldn't start the microphone: "+(e&&e.message||e));return;}
+  mime=MIMES.find(m=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))||"";
+  try{rec=new MediaRecorder(stream,mime?{mimeType:mime,audioBitsPerSecond:64000}:undefined);}catch(_){rec=new MediaRecorder(stream);}
+  mime=rec.mimeType||mime||"audio/webm";
+  chunks=[];finalText="";interim="";marks=[];renderMarks();renderLive();
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  rec.start(1000);
+  startAt=Date.now();pausedTotal=0;pauseAt=0;startedIso=new Date().toISOString();
+  tick=setInterval(()=>{$("clock").textContent=fmt(elapsed());status();},250);
+  meter();
+  if($("keepAwake").checked)awake("rec",true);
+  if(SR&&$("doLive").checked){$("liveWrap").hidden=false;startRecog();}
+  $("recBtn").classList.add("on");$("recBtn").setAttribute("aria-label","Stop and save");
+  $("pauseBtn").disabled=false;$("discardBtn").disabled=false;$("markBtn").disabled=false;$("doLive").disabled=true;
+  $("tip").textContent="Recording. Tap the square to stop and save.";
+  setState("rec","Recording");status();
+}
+function pause(){
+  if(!rec)return;
+  if(rec.state==="recording"){rec.pause();pauseAt=Date.now();stopRecog();setState("paused","Paused");$("pauseBtn").textContent="Resume";}
+  else if(rec.state==="paused"){rec.resume();pausedTotal+=Date.now()-pauseAt;pauseAt=0;if(SR&&$("doLive").checked)startRecog();setState("rec","Recording");$("pauseBtn").textContent="Pause";}
+}
+function finish(){return new Promise(res=>{if(!rec||rec.state==="inactive"){res();return;}rec.onstop=()=>res();try{rec.requestData()}catch(_){}rec.stop();});}
+function cleanup(){
+  clearInterval(tick);tick=null;cancelAnimationFrame(raf);
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  if(actx)actx.close().catch(()=>{});
+  stopRecog();awake("rec",false);
+  stream=null;rec=null;actx=null;analyser=null;startAt=0;pauseAt=0;
+  $("level").style.width="0";
+  $("recBtn").classList.remove("on");$("recBtn").setAttribute("aria-label","Start recording");
+  $("pauseBtn").disabled=true;$("pauseBtn").textContent="Pause";$("discardBtn").disabled=true;$("markBtn").disabled=true;$("doLive").disabled=false;
+  $("clock").textContent="00:00";$("liveWrap").hidden=true;status();
+  $("tip").textContent="Tap the red button to start. Keep this app open while recording.";
+  setState("","Ready");
+}
+async function stopAndSave(){
+  const dur=elapsed();
+  $("recBtn").disabled=true;setState("","Saving…");
+  await finish();
+  const blob=new Blob(chunks,{type:mime});
+  const t=$("title").value.trim(),when=new Date(startedIso);
+  const m={id:"m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    title:t||("Meeting "+when.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" "+when.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})),
+    started:startedIso,duration:dur,mime,blob,live:(finalText+" "+interim).trim(),notes:$("notes").value.trim(),marks:marks.slice(),tx:null};
+  cleanup();
+  let saved=true;
+  try{await dbPut(m);$("title").value="";$("notes").value="";finalText="";interim="";marks=[];renderMarks();renderLive();}
+  catch(e){saved=false;showErr("Couldn't save to the phone's storage, so the recording is being downloaded instead.");download(blob,fileName(m,ext(mime)));}
+  $("recBtn").disabled=false;
+  await load();
+  if(saved){go("meetings");if($("autoTx").checked)queueTx(m.id);}
+}
+async function discard(){
+  if(!confirm("Discard this recording? It won't be saved."))return;
+  await finish();chunks=[];cleanup();finalText="";interim="";marks=[];renderMarks();renderLive();
+}
+$("recBtn").onclick=()=>{rec?stopAndSave():start()};
+$("pauseBtn").onclick=pause;
+$("discardBtn").onclick=discard;
+window.addEventListener("beforeunload",e=>{if(rec||job){e.preventDefault();e.returnValue="";}});
+
+function meter(){
+  try{const AC=window.AudioContext||window.webkitAudioContext;actx=new AC();
+    const src=actx.createMediaStreamSource(stream);analyser=actx.createAnalyser();analyser.fftSize=512;src.connect(analyser);
+    const buf=new Uint8Array(analyser.fftSize);
+    const loop=()=>{if(!analyser)return;analyser.getByteTimeDomainData(buf);let sum=0;for(const v of buf){const d=(v-128)/128;sum+=d*d}
+      $("level").style.width=(rec&&rec.state==="recording"?Math.min(100,Math.sqrt(sum/buf.length)*350):0)+"%";raf=requestAnimationFrame(loop)};
+    loop();}catch(_){}
+}
+
+/* screen wake lock, held while recording or transcribing */
+const wakeWant=new Set();
+async function awake(who,on){
+  on?wakeWant.add(who):wakeWant.delete(who);
+  try{
+    if(wakeWant.size&&!wake&&"wakeLock" in navigator){wake=await navigator.wakeLock.request("screen");wake.addEventListener("release",()=>{wake=null});}
+    else if(!wakeWant.size&&wake){const w=wake;wake=null;await w.release();}
+  }catch(_){}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&wakeWant.size&&!wake)awake([...wakeWant][0],true)});
+
+/* live captions (browser speech recognition, rough) */
+function startRecog(){
+  if(!SR)return;recogWanted=true;if(recog)return;
+  recog=new SR();recog.continuous=true;recog.interimResults=true;recog.lang=navigator.language||"en-GB";
+  recog.onresult=e=>{interim="";for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)finalText+=(finalText?" ":"")+r[0].transcript.trim();else interim+=r[0].transcript;}renderLive();};
+  recog.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){recogWanted=false;$("live").innerHTML='<span class="hint">Live captions aren\'t allowed on this device. The audio is still recording, and the full transcript is made when you stop.</span>';}};
+  recog.onend=()=>{recog=null;if(interim){finalText+=(finalText?" ":"")+interim.trim();interim="";}if(recogWanted&&rec&&rec.state==="recording")setTimeout(startRecog,250);};
+  try{recog.start()}catch(_){recog=null}
+}
+function stopRecog(){recogWanted=false;if(recog){try{recog.stop()}catch(_){}}}
+function renderLive(){const el=$("live");
+  if(!finalText&&!interim){el.innerHTML='<span class="hint">Rough captions appear here while you record.</span>';return;}
+  el.innerHTML=esc(finalText)+(interim?' <span class="interim">'+esc(interim)+'</span>':"");el.scrollTop=el.scrollHeight;}
+
+$("markForm").onsubmit=e=>{e.preventDefault();if(!rec)return;marks.push({t:elapsed(),text:$("markTxt").value.trim()||"Bookmark"});$("markTxt").value="";renderMarks();};
+function renderMarks(){$("marks").innerHTML=marks.map(m=>`<div><b class="num">${fmt(m.t)}</b><span>${esc(m.text)}</span></div>`).join("");}
+
+/* ---------- transcription (on-device Whisper in a worker) ---------- */
+let worker=null,job=null;const queue=[];
+function queueTx(id){if(job&&job.id===id||queue.includes(id))return;queue.push(id);updateTx(id);runQueue();}
+async function decode16k(blob){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  const ac=new AC({sampleRate:16000});
+  try{
+    const ab=await ac.decodeAudioData(await blob.arrayBuffer());
+    if(ab.numberOfChannels===1)return ab.getChannelData(0);
+    const out=new Float32Array(ab.length);
+    for(let c=0;c<ab.numberOfChannels;c++){const d=ab.getChannelData(c);for(let i=0;i<d.length;i++)out[i]+=d[i]/ab.numberOfChannels;}
+    return out;
+  }finally{ac.close&&ac.close().catch(()=>{});}
+}
+async function runQueue(){
+  if(job||!queue.length)return;
+  const id=queue.shift();const m=all.find(x=>x.id===id);if(!m){runQueue();return;}
+  const model=$("model").value,lang=$("lang").value;
+  if(!m.tx||m.tx.model!==model||m.tx.lang!==lang||m.tx.status==="done")m.tx={status:"running",model,lang,upto:0,total:m.duration/1000,segs:[]};
+  m.tx.status="running";
+  job={id,phase:"Preparing the audio…",pct:0,t0:0,from:m.tx.upto};
+  awake("tx",true);updateTx(id);
+  let audio;
+  try{audio=await decode16k(m.blob);}
+  catch(e){m.tx.status="error";m.tx.error="This phone couldn't read the recording to transcribe it.";await dbPut(m).catch(()=>{});endJob(id);return;}
+  m.tx.total=audio.length/16000;
+  if(!worker){worker=new Worker("worker.js",{type:"module"});}
+  worker.onmessage=async e=>{
+    const d=e.data;if(!job||job.id!==id)return;
+    if(d.type==="status"){job.phase=d.text;updateTx(id);}
+    else if(d.type==="download"){job.phase=`Downloading the speech model (one time only)… ${Math.round(d.loaded/1048576)} of ${Math.round(d.total/1048576)} MB`;job.pct=d.loaded/d.total;updateTx(id);}
+    else if(d.type==="ready"){job.phase="Transcribing…";job.t0=Date.now();job.from=m.tx.upto;job.pct=m.tx.upto/m.tx.total;updateTx(id);}
+    else if(d.type==="segs"){
+      m.tx.segs.push(...d.segs);m.tx.upto=d.upto;job.pct=d.upto/d.total;
+      const done=d.upto-job.from,secs=(Date.now()-job.t0)/1000;
+      if(done>20&&secs>3){const left=(d.total-d.upto)*secs/done;job.phase=`Transcribing… about ${left<90?Math.max(1,Math.round(left/10)*10)+" sec":Math.round(left/60)+" min"} left`;}
+      updateTx(id);dbPut(m).catch(()=>{});
+    }
+    else if(d.type==="done"){m.tx.status="done";m.tx.upto=m.tx.total;await dbPut(m).catch(()=>{});endJob(id);}
+    else if(d.type==="error"){console.warn("Transcriber:",d.message);m.tx.status="error";m.tx.error=/fetch|network|Failed to load/i.test(d.message)?"Couldn't download the speech model. Check the internet connection and tap Continue.":"Transcription stopped: "+d.message;await dbPut(m).catch(()=>{});endJob(id);}
+  };
+  worker.onerror=async ev=>{ev.preventDefault&&ev.preventDefault();if(!job||job.id!==id)return;m.tx.status="error";m.tx.error="The transcriber couldn't start on this browser.";await dbPut(m).catch(()=>{});worker.terminate();worker=null;endJob(id);};
+  worker.postMessage({audio,start:m.tx.upto,model,lang},[audio.buffer]);
+}
+function endJob(id){job=null;awake("tx",false);updateTx(id);runQueue();}
+async function stopTx(id){
+  if(job&&job.id===id){worker.terminate();worker=null;const m=all.find(x=>x.id===id);if(m&&m.tx){m.tx.status="paused";await dbPut(m).catch(()=>{});}endJob(id);}
+  else{const i=queue.indexOf(id);if(i>=0)queue.splice(i,1);updateTx(id);}
+}
+
+function txHtml(m){
+  const t=m.tx,running=job&&job.id===m.id,queued=queue.includes(m.id);
+  let head="",body="";
+  if(running){head=`<span class="hint">${esc(job.phase)}</span><button type="button" class="btn ghost tbtn" data-act="txstop">Stop</button>`;body=`<div class="bar"><i style="width:${Math.round((job.pct||0)*100)}%"></i></div>`;}
+  else if(queued){head=`<span class="hint">Waiting to transcribe…</span><button type="button" class="btn ghost tbtn" data-act="txstop">Cancel</button>`;}
+  else if(!t){head=`<span class="hint">No transcript yet.</span><button type="button" class="btn tbtn" data-act="tx">Transcribe</button>`;}
+  else if(t.status==="done"){head=`<span class="hint">Transcript${t.segs.length?"":": no speech was found"}</span><span class="acts"><button type="button" class="btn tbtn" data-act="notes">Save to Notes</button><button type="button" class="btn ghost tbtn" data-act="tx">Redo</button></span>`;}
+  else{const pct=t.total?Math.round(t.upto/t.total*100):0;head=`<span class="hint">${t.status==="error"?esc(t.error)+" ":""}Transcript ${pct}% done.</span><button type="button" class="btn tbtn" data-act="txgo">Continue</button>`;}
+  if(t&&t.segs&&t.segs.length)body+=`<div class="txt" id="txt-${m.id}">${t.segs.map(s=>`<p data-s="${s.s}"><button type="button" class="ts num" data-seek="${m.id}" data-t="${Math.round(s.s*1000)}">${fmt(s.s*1000)}</button>${esc(s.t)}</p>`).join("")}</div>`;
+  return `<div class="txhead">${head}</div>${body}`;
+}
+function updateTx(id){status();const m=all.find(x=>x.id===id);const el=$("tx-"+id);if(!m||!el)return;
+  const box=$("txt-"+id),atEnd=!box||box.scrollTop+box.clientHeight>=box.scrollHeight-8;
+  el.innerHTML=txHtml(m);
+  const nb=$("txt-"+id);if(nb&&job&&job.id===id&&atEnd)nb.scrollTop=nb.scrollHeight;}
+
+/* ---------- saved list ---------- */
+let all=[];const urls=new Map();
+const ext=m=>/mp4|aac|m4a/.test(m)?"m4a":/ogg/.test(m)?"ogg":"webm";
+const fileName=(m,x)=>(m.title.replace(/[^\w\- ]+/g,"").trim().replace(/\s+/g,"-")||"meeting")+"-"+m.started.slice(0,10)+"."+x;
+function download(blob,name){const u=URL.createObjectURL(blob);const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);}
+function textOf(m){
+  const d=new Date(m.started);
+  let s=`${m.title}\n${d.toLocaleString("en-GB",{dateStyle:"full",timeStyle:"short"})}\nLength: ${fmt(m.duration)}\n`;
+  if(m.notes)s+=`\nNOTES\n${m.notes}\n`;
+  if(m.marks&&m.marks.length)s+=`\nBOOKMARKS\n${m.marks.map(k=>fmt(k.t)+"  "+k.text).join("\n")}\n`;
+  if(m.tx&&m.tx.segs&&m.tx.segs.length)s+=`\nTRANSCRIPT${m.tx.status==="done"?"":" (unfinished)"} – made automatically, may contain mistakes\n${m.tx.segs.map(x=>"["+fmt(x.s*1000)+"] "+x.t).join("\n")}\n`;
+  else if(m.live)s+=`\nLIVE CAPTIONS (rough)\n${m.live}\n`;
+  return s;
+}
+async function load(){
+  try{all=(await dbAll()).sort((a,b)=>b.started.localeCompare(a.started));}
+  catch(e){$("list").innerHTML='<div class="empty">Couldn\'t open this phone\'s storage. Private browsing may block it.</div>';return;}
+  render();storage();
+}
+function render(){
+  const q=$("q").value.trim().toLowerCase();
+  const hay=m=>(m.title+" "+m.notes+" "+(m.live||"")+" "+(m.marks||[]).map(k=>k.text).join(" ")+" "+(m.tx&&m.tx.segs?m.tx.segs.map(s=>s.t).join(" "):"")).toLowerCase();
+  const rows=q?all.filter(m=>hay(m).includes(q)):all;
+  $("count").textContent=all.length?all.length+" saved":"";$("allNotes").hidden=!rows.length;$("allNotes").textContent=q?"Save these to Notes":"Save all to Notes";
+  for(const [id,u] of urls){if(!all.some(m=>m.id===id)){URL.revokeObjectURL(u);urls.delete(id);}}
+  if(!rows.length){$("list").innerHTML=`<div class="empty">${all.length?"No meetings match that search.":"No meetings recorded yet. Your recordings will be listed here."}</div>`;return;}
+  $("list").innerHTML=rows.map(m=>{
+    if(!urls.has(m.id))urls.set(m.id,URL.createObjectURL(m.blob));
+    const d=new Date(m.started);
+    const mk=(m.marks||[]).map(k=>`<div><button type="button" class="ts num" data-seek="${m.id}" data-t="${k.t}">${fmt(k.t)}</button><span>${esc(k.text)}</span></div>`).join("");
+    return `<article class="item" data-id="${m.id}">
+      <div class="top"><h3>${esc(m.title)}</h3><span class="hint num">${esc(d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"}))} · ${esc(d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}))} · ${fmt(m.duration)} · ${(m.blob.size/1048576).toFixed(1)} MB</span></div>
+      <audio controls preload="metadata" src="${urls.get(m.id)}" id="a-${m.id}" data-id="${m.id}"></audio>
+      ${mk?`<div class="marks">${mk}</div>`:""}
+      <div class="tx" id="tx-${m.id}">${txHtml(m)}</div>
+      <details><summary>Notes</summary><div class="body">
+        <label class="sr" for="n-${m.id}">Notes</label><textarea id="n-${m.id}" data-notes="${m.id}" placeholder="Add notes">${esc(m.notes)}</textarea>
+        ${m.live?`<div class="label">Live captions (rough)</div><div class="live">${esc(m.live)}</div>`:""}
+      </div></details>
+      <div class="acts">
+        <button type="button" class="btn" data-act="notes">Save to Notes</button>
+        <button type="button" class="btn ghost" data-act="audio">Download audio</button>
+        <button type="button" class="btn ghost" data-act="text">Download transcript</button>
+        <button type="button" class="btn ghost" data-act="copy">Copy text</button>
+        <button type="button" class="btn ghost" data-act="rename">Rename</button>
+        <button type="button" class="btn danger" data-act="delete">Delete</button>
+      </div>
+    </article>`;
+  }).join("");
+  // Chrome's recordings have no length in the file; make the player work it out so seeking works
+  document.querySelectorAll("#list audio").forEach(a=>{
+    a.addEventListener("loadedmetadata",()=>{if(a.duration===Infinity){const back=()=>{a.removeEventListener("durationchange",back);a.currentTime=0};a.addEventListener("durationchange",back);a.currentTime=1e7;}},{once:true});
+    a.addEventListener("timeupdate",()=>hilite(a));
+  });
+}
+function hilite(a){const box=$("txt-"+a.dataset.id);if(!box)return;const t=a.currentTime;let cur=null;
+  for(const p of box.children){if(+p.dataset.s<=t+0.2)cur=p;else break;}
+  for(const p of box.querySelectorAll("p.now"))if(p!==cur)p.classList.remove("now");
+  if(cur&&!cur.classList.contains("now")&&!a.paused){cur.classList.add("now");box.scrollTop=cur.offsetTop-box.offsetTop-40;}}
+$("q").addEventListener("input",render);
+
+/* Save to Notes: opens the phone's Share menu with the text and the audio; pick Notes there
+   (Apple Notes, Google Keep, Samsung Notes…). A web app can't write into Notes directly. */
+const NOTE_FILES_MAX=200*1048576;
+async function saveToNotes(list,btn){
+  const msg=t=>{$("notesMsg").textContent=t;if(t)setTimeout(()=>{if($("notesMsg").textContent===t)$("notesMsg").textContent=""},8000)};
+  const title=list.length===1?list[0].title:`Meeting recordings (${list.length})`;
+  const text=list.map(textOf).join("\n\n――――――――――\n\n");
+  if(!navigator.share){
+    // computer without a Share menu: copy the text and download the audio instead
+    try{await navigator.clipboard.writeText(text)}catch(_){}
+    list.forEach((m,i)=>setTimeout(()=>download(m.blob,fileName(m,ext(m.mime))),i*400));
+    msg("This browser has no Share menu. The text is copied (paste it into a note) and the audio is downloading.");
+    return;
+  }
+  const files=list.map(m=>new File([m.blob],fileName(m,ext(m.mime)),{type:m.mime.split(";")[0]}));
+  const size=files.reduce((s,f)=>s+f.size,0);
+  const data={title,text};
+  let withAudio=false;
+  try{if(size<=NOTE_FILES_MAX&&navigator.canShare&&navigator.canShare({files})){data.files=files;withAudio=true;}}catch(_){}
+  if(btn)btn.disabled=true;
+  try{
+    await navigator.share(data);
+    if(!withAudio)msg(size>NOTE_FILES_MAX?"The text was shared. The recordings were too big to attach together, so save them one at a time.":"The text was shared. This phone couldn't attach the audio; use Download audio for that.");
+  }catch(e){
+    if(e&&e.name!=="AbortError"&&withAudio){
+      // some apps refuse files: try again with just the text
+      try{delete data.files;await navigator.share(data);msg("The text was shared without the audio. Use Download audio for the recording.");}catch(_){}
+    }
+  }finally{if(btn)btn.disabled=false;}
+}
+$("allNotes").onclick=()=>{
+  const q=$("q").value.trim();
+  const list=q?[...document.querySelectorAll("#list .item")].map(el=>all.find(m=>m.id===el.dataset.id)).filter(Boolean):all;
+  if(list.length)saveToNotes(list,$("allNotes"));
+};
+
+$("list").addEventListener("click",async e=>{
+  const sk=e.target.closest("[data-seek]");
+  if(sk){const a=$("a-"+sk.dataset.seek);a.currentTime=+sk.dataset.t/1000;a.play().catch(()=>{});return;}
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const id=b.closest(".item").dataset.id;const m=all.find(x=>x.id===id);if(!m)return;
+  const act=b.dataset.act;
+  if(act==="audio")download(m.blob,fileName(m,ext(m.mime)));
+  else if(act==="text")download(new Blob([textOf(m)],{type:"text/plain"}),fileName(m,"txt"));
+  else if(act==="copy"){try{await navigator.clipboard.writeText(textOf(m));b.textContent="Copied";setTimeout(()=>b.textContent="Copy text",1500);}catch(_){}}
+  else if(act==="notes")saveToNotes([m],b);
+  else if(act==="tx"){if(m.tx&&m.tx.segs&&m.tx.segs.length&&!confirm("Make a new transcript? The current one will be replaced."))return;m.tx=null;queueTx(id);}
+  else if(act==="txgo")queueTx(id);
+  else if(act==="txstop")stopTx(id);
+  else if(act==="rename"){const t=prompt("Meeting name",m.title);if(t&&t.trim()){m.title=t.trim().slice(0,120);await dbPut(m);b.closest(".item").querySelector("h3").textContent=m.title;}}
+  else if(act==="delete"){if(confirm(`Delete "${m.title}"? This can't be undone.`)){await stopTx(id);await dbDel(id);all=all.filter(x=>x.id!==id);render();storage();}}
+});
+let saveT=null;
+$("list").addEventListener("input",e=>{const ta=e.target.closest("[data-notes]");if(!ta)return;const m=all.find(x=>x.id===ta.dataset.notes);if(!m)return;m.notes=ta.value;clearTimeout(saveT);saveT=setTimeout(()=>dbPut(m).catch(()=>{}),600);});
+
+async function storage(){
+  const total=all.reduce((s,m)=>s+(m.blob?m.blob.size:0),0);
+  let t=`${all.length} meeting${all.length===1?"":"s"} · ${(total/1048576).toFixed(1)} MB used.`;
+  try{if(navigator.storage&&navigator.storage.estimate){const e=await navigator.storage.estimate();if(e.quota)t+=` About ${Math.max(0,(e.quota-e.usage)/1073741824).toFixed(1)} GB free for this app.`;}}catch(_){}
+  t+=" Download anything important. Clearing the browser's site data deletes recordings.";
+  $("storage").textContent=t;
+}
+
+/* offline support; it also lets the transcriber use several processor cores */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    let done=false;try{done=sessionStorage.getItem("rec.reloaded")==="1"}catch(_){done=true}
+    if(!window.crossOriginIsolated&&!done&&!rec&&!job){try{sessionStorage.setItem("rec.reloaded","1")}catch(_){}location.reload();}
+  });
+}
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+load();
+})();
+</script>
+</body>
+</html>

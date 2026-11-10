@@ -2,6 +2,8 @@
 
 **Live app:** https://allinsideconstruction.github.io/Luach-/
 
+This repository also holds a separate **Meeting Recorder** app at https://allinsideconstruction.github.io/Luach-/recorder/. See [recorder/README.md](recorder/README.md).
+
 A daily Jewish life and learning app. This is the GPS edition: it asks the phone for its location, so zmanim and Shabbos times are worked out for exactly where you are.
 
 ## Sections (bottom bar on phones, tabs on a computer)
